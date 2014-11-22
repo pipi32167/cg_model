@@ -13,11 +13,8 @@ var User = model.createModel({
       type: 'number',
       primary: true,
       defaultValue: function(cb) {
-        var sql = 'call gen_userId($count)';
-        var args = {
-          count: 1
-        };
-        this.db.conn.query(sql, args, function(err, res) {
+        var sql = 'call gen_userId(1)';
+        this.db.conn.query(sql, [], function(err, res) {
           if (!!err) {
             cb(err);
             return;
@@ -150,7 +147,7 @@ describe('Model', function() {
       async.series({
 
         createUsers: function(cb) {
-          helper.createUsers(count, function (err, res) {
+          helper.createUsers(count, function(err, res) {
             assert.ok(!err, err);
             users = res;
             cb();
@@ -158,32 +155,30 @@ describe('Model', function() {
         },
 
         findUserByUserId: function(cb) {
-          var userIds = _(users).map(function (elem) {
+          var tbl_user = User.db.queryBuilder;
+          var inArgs = _(users).map(function(elem) {
             return elem.p('userId');
           });
-          User.find({
-            userId: userIds,
-          }, function(err, res) {
+          var query = tbl_user.where(tbl_user.userId.in(inArgs)).toQuery('mysql');
+          User.find(query, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, count);
-            // assert.equal(res[0].p('userId'), userId);
-            // assert.equal(res[0].p('name'), name);
             cb();
           });
         },
 
-        // findUserByName: function(cb) {
-        //   User.find({
-        //     name: name
-        //   }, function(err, res) {
-
-        //     assert.ok(!err, err);
-        //     assert.equal(res.length, 1);
-        //     assert.equal(res[0].p('userId'), userId);
-        //     assert.equal(res[0].p('name'), name);
-        //     cb();
-        //   })
-        // }
+        findUserByName: function(cb) {
+          var tbl_user = User.db.queryBuilder;
+          var inArgs = _(users).map(function(elem) {
+            return elem.p('name');
+          });
+          var query = tbl_user.where(tbl_user.name.in(inArgs)).toQuery('mysql');
+          User.find(query, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count);
+            cb();
+          });
+        }
 
       }, function(err) {
         assert.ok(!err, err);
