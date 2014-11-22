@@ -2,7 +2,8 @@
 var mysql = require('mysql');
 var redis = require('redis');
 var model = require('../lib');
-model.debug_mode = true;
+// var debug_mode = model.debug_mode = false;
+var debug_mode = model.debug_mode = true;
 
 module.exports = function(dbConfig) {
 
@@ -29,7 +30,9 @@ module.exports = function(dbConfig) {
         }
         return txt;
       }.bind(this));
-    console.log('sql:', res);
+    if (debug_mode) {
+      console.log('[sql]:', res);
+    }
     return res;
   };
 
