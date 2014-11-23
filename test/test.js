@@ -51,6 +51,42 @@ var User = model.createModel({
   },
 });
 
+var Friend = model.createModel({
+
+  name: 'Friend',
+
+  props: {
+    userId: {
+      type: 'number',
+      primary: true,
+    },
+    friendId: {
+      type: 'number',
+      primary: true,
+    },
+    type: {
+      type: 'number',
+    },
+    assistTime: {
+      type: 'date',
+      defaultValue: function(cb) {
+        cb(null, new Date('2001-1-1'));
+      }
+    },
+  },
+
+  db: {
+    type: 'mysql',
+    tbl_name: 'friend',
+  },
+
+  cache: {
+    type: 'redis',
+    name: 'friend',
+    prefix: 'test',
+  },
+});
+
 var helper = {};
 helper.createUsers = function(count, cb) {
   var res = [];
@@ -70,13 +106,14 @@ helper.createUsers = function(count, cb) {
     });
 }
 
-describe('Model', function() {
+describe('User Model', function() {
   beforeEach(function(done) {
     User.removeAll(function(err) {
       assert.ok(!err, err);
       done();
     });
   });
+
   describe('static methods', function() {
     it('should remove all data from db and cache', function(done) {
       User.removeAll(function(err) {
@@ -89,7 +126,7 @@ describe('Model', function() {
       User.find({
         userId: 1
       }, function(err, res) {
-        assert.ok(!err);
+        assert.ok(!err, err);
         assert.equal(res.length, 0);
         done();
       });
@@ -260,7 +297,7 @@ describe('Model', function() {
           var user = new User();
           user.p('userId', userId);
           user.load(function(err) {
-            assert.ok(!err);
+            assert.ok(!err, err);
             assert.ok(!user.mem.isLoaded);
             assert.ok(!user.db.isSaved);
             assert.ok(!user.cache.isSaved);
@@ -315,8 +352,316 @@ describe('Model', function() {
         assert.ok(!err, err);
         done();
       });
+    });
+  });
+});
 
+helper.createFriends = function(userId, friendIds, cb) {
+  async.eachSeries(
+    friendIds,
+    function(friendId, cb) {
+      var friend = new Friend();
+      friend.p({
+        userId: userId,
+        friendId: friendId,
+        type: 0
+      });
+      friend.create(function(err) {
+        assert.ok(!err, err);
+        assert.ok(friend.mem.isLoaded);
+        assert.ok(friend.db.isSaved);
+        assert.ok(friend.cache.isSaved);
+        cb();
+      })
+    },
+    cb);
+}
+
+describe('Friend Model', function() {
+
+  beforeEach(function(done) {
+    Friend.removeAll(function(err) {
+      assert.ok(!err, err);
+      done();
+    })
+  });
+
+  describe('static methods', function() {
+    it('should remove all data from db and cache', function(done) {
+
+      var userId = 1;
+      var friendIds = [2, 3, 4, 5];
+      async.series({
+        createFriends: function(cb) {
+          helper.createFriends(userId, friendIds, cb);
+        },
+
+        check1: function(cb) {
+          async.eachSeries(
+            friendIds,
+            function(friendId, cb) {
+              var friend = new Friend();
+              friend.p({
+                userId: userId,
+                friendId: friendId,
+              });
+              friend.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(friend.mem.isLoaded);
+                assert.ok(friend.db.isSaved);
+                assert.ok(friend.cache.isSaved);
+                cb();
+              })
+            },
+            cb);
+        },
+
+        removeAllFriends: function(cb) {
+          Friend.removeAll(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        check2: function(cb) {
+          async.eachSeries(
+            friendIds,
+            function(friendId, cb) {
+              var friend = new Friend();
+              friend.p({
+                userId: userId,
+                friendId: friendId,
+              });
+              friend.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!friend.mem.isLoaded);
+                assert.ok(!friend.db.isSaved);
+                assert.ok(!friend.cache.isSaved);
+                cb();
+              })
+            },
+            cb);
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should find no friends success', function(done) {
+      Friend.find({
+        userId: 1
+      }, function(err, res) {
+        assert.ok(!err, err);
+        assert.equal(res.length, 0);
+        done();
+      });
+    });
+
+    it('should find friends success when specified userId', function(done) {
+      var userId = 1;
+      var friendIds = [2, 3, 4, 5];
+      async.series({
+        createFriends: function(cb) {
+          helper.createFriends(userId, friendIds, cb);
+        },
+
+        find: function(cb) {
+          Friend.find({
+            userId: 1
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 4);
+            cb();
+          });
+        },
+
+        find2: function(cb) {
+          Friend.find({
+            friendId: 2
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 1);
+            cb();
+          });
+        },
+
+        find3: function(cb) {
+          Friend.find({
+            userId: 1,
+            friendId: 2
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 1);
+            cb();
+          });
+        },
+
+        find4: function(cb) {
+          Friend.find({
+            userId: 1,
+            friendId: [2, 3]
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 2);
+            cb();
+          });
+        },
+
+        find5: function(cb) {
+          Friend.find({
+            userId: 2,
+            friendId: [2, 3]
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 0);
+            cb();
+          });
+        },
+
+        find6: function(cb) {
+          Friend.find({
+            userId: [1, 2],
+            friendId: [1, 2, 3]
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 2);
+            cb();
+          });
+        },
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
     });
   });
 
+  describe('instance methods', function() {
+
+    it('should create a new friend success', function(done) {
+
+      var friend1, friend2;
+      async.series({
+        create: function(cb) {
+          friend1 = new Friend();
+          friend1.p({
+            userId: 1,
+            friendId: 2,
+            type: 0,
+          });
+          friend1.create(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        check: function(cb) {
+          friend2 = new Friend();
+          friend2.p({
+            userId: 1,
+            friendId: 2,
+            type: 1, //Can I fool the model?
+          });
+          friend2.load(function(err) {
+            assert.ok(!err, err);
+            assert.equal(friend2.p('type'), friend1.p('type'));
+            cb();
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should create and remove a friend success', function(done) {
+      var friend1, friend2;
+      async.series({
+        create: function(cb) {
+          friend1 = new Friend();
+          friend1.p({
+            userId: 1,
+            friendId: 2,
+            type: 0,
+          });
+          friend1.create(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        remove: function(cb) {
+          friend1.remove(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        check: function(cb) {
+          friend2 = new Friend();
+          friend2.p({
+            userId: 1,
+            friendId: 2,
+          });
+          friend2.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(!friend2.mem.isLoaded);
+            assert.ok(!friend2.db.isSaved);
+            assert.ok(!friend2.cache.isSaved);
+            cb();
+          });
+        },
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should update friend success', function(done) {
+      var friend1, friend2;
+      var now = new Date();
+      async.series({
+        create: function(cb) {
+          friend1 = new Friend();
+          friend1.p({
+            userId: 1,
+            friendId: 2,
+            type: 0,
+          });
+          friend1.create(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        update: function(cb) {
+
+          friend1.p('assistTime', now);
+          friend1.update(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        check: function(cb) {
+          friend2 = new Friend();
+          friend2.p({
+            userId: 1,
+            friendId: 2,
+          });
+          friend2.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(friend2.mem.isLoaded);
+            assert.ok(friend2.db.isSaved);
+            assert.ok(friend2.cache.isSaved);
+            assert.equal(friend2.p('assistTime'), friend1.p('assistTime'));
+            cb();
+          });
+        },
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+  });
 });
