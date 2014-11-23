@@ -155,12 +155,12 @@ describe('Model', function() {
         },
 
         findUserByUserId: function(cb) {
-          var tbl_user = User.db.queryBuilder;
-          var inArgs = _(users).map(function(elem) {
+          var userIds = _(users).map(function(elem) {
             return elem.p('userId');
           });
-          var query = tbl_user.where(tbl_user.userId.in(inArgs)).toQuery('mysql');
-          User.find(query, function(err, res) {
+          User.find({
+            userId: userIds
+          }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, count);
             cb();
@@ -168,12 +168,12 @@ describe('Model', function() {
         },
 
         findUserByName: function(cb) {
-          var tbl_user = User.db.queryBuilder;
-          var inArgs = _(users).map(function(elem) {
+          var names = _(users).map(function(elem) {
             return elem.p('name');
           });
-          var query = tbl_user.where(tbl_user.name.in(inArgs)).toQuery('mysql');
-          User.find(query, function(err, res) {
+          User.find({
+            name: names
+          }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, count);
             cb();
