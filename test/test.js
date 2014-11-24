@@ -248,7 +248,18 @@ describe('User Model', function() {
             })
             cb();
           });
-        }
+        },
+
+        findAll: function(cb) {
+          User.findAll(function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          });
+        },
 
       }, function(err) {
         assert.ok(!err, err);
