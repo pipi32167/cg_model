@@ -903,167 +903,460 @@ describe('DataMySqlLate', function() {
     done();
   });
 
-  it('should run a job late success', function(done) {
-    var user = new User2();
-    user.p('userId', 1);
+  describe('Static methods', function() {
 
-    user.create(function(err) {
-      assert.ok(!err, err);
+    it('should remove all data from db and cache', function(done) {
+      User2.removeAll(function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
 
-      user.p('name', '0' + user.p('name'));
-      user.db.once('updated', function() {
+    it('should find no users success', function(done) {
+      User2.find({
+        userId: 1
+      }, function(err, res) {
+        assert.ok(!err, err);
+        assert.equal(res.length, 0);
         done();
       });
-      user.update(function(err) {
+    });
+
+    it('should find a user success', function(done) {
+      var userId, name;
+      async.series({
+
+        createUser: function(cb) {
+          var user = new User2();
+          user.create(function(err) {
+            assert.ok(!err, err);
+            userId = user.p('userId');
+            name = user.p('name');
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        },
+
+        findUserByUserId: function(cb) {
+          User2.find({
+            userId: userId
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 1);
+            assert.equal(res[0].p('userId'), userId);
+            assert.equal(res[0].p('name'), name);
+            helper.checkModelIsLoaded(res[0]);
+            cb();
+          });
+        },
+
+        findUserByName: function(cb) {
+          User2.find({
+            name: name
+          }, function(err, res) {
+
+            assert.ok(!err, err);
+            assert.equal(res.length, 1);
+            assert.equal(res[0].p('userId'), userId);
+            assert.equal(res[0].p('name'), name);
+            helper.checkModelIsLoaded(res[0]);
+            cb();
+          })
+        }
+
+      }, function(err) {
         assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should find many users success', function(done) {
+
+      var count = 5;
+      var users;
+      async.series({
+
+        createUsers: function(cb) {
+          helper.createUsers(count, function(err, res) {
+            assert.ok(!err, err);
+            users = res;
+            cb();
+          });
+        },
+
+        findUserByUserId: function(cb) {
+          var userIds = _(users).map(function(elem) {
+            return elem.p('userId');
+          });
+          User2.find({
+            userId: userIds
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          });
+        },
+
+        findUserByName: function(cb) {
+          var names = _(users).map(function(elem) {
+            return elem.p('name');
+          });
+          User2.find({
+            name: names
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          });
+        },
+
+        findAll: function(cb) {
+          User2.findAll(function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          });
+        },
+
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+  });
+
+  describe('Instance methods', function() {
+
+    it('should create a new user success', function(done) {
+
+      var userId;
+
+      async.series({
+        create: function(cb) {
+
+          var user = new User2();
+          user.create(function(err) {
+            assert.ok(!err, err);
+            userId = user.p('userId');
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        },
+
+        load: function(cb) {
+
+          var user = new User2();
+          user.p('userId', userId);
+          user.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(user.mem.isLoaded);
+            assert.ok(user.db.isSaved);
+            assert.ok(user.cache.isSaved);
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
       });
-    })
+    });
+
+    it('should access by property of object success', function(done) {
+
+      var userId;
+
+      async.series({
+        create: function(cb) {
+
+          var user = new User2();
+          user.create(function(err) {
+            assert.ok(!err, err);
+            userId = user.userId;
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        },
+
+        load: function(cb) {
+
+          var user = new User2();
+          user.userId = userId;
+          user.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
+    it('should create a new user and remove it success', function(done) {
+
+      var userId;
+
+      async.series({
+        create: function(cb) {
+
+          var user = new User2();
+          user.create(function(err) {
+            assert.ok(!err, err);
+            userId = user.p('userId');
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        },
+
+        remove: function(cb) {
+          var user = new User2();
+          user.p('userId', userId);
+          user.remove(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsUnloaded(user);
+            cb();
+          });
+        },
+
+        load: function(cb) {
+
+          var user = new User2();
+          user.p('userId', userId);
+          user.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsUnloaded(user);
+            cb();
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
+    it('should update user success', function(done) {
+
+      var userId, user;
+
+      async.series({
+        create: function(cb) {
+
+          user = new User2();
+          user.create(function(err) {
+            assert.ok(!err, err);
+            userId = user.p('userId');
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        },
+
+        update: function(cb) {
+          user.p('name', '0' + user.p('name'));
+          user.db.once('updated', function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+          user.update(function(err) {
+            assert.ok(!err, err);
+          });
+        },
+
+        check: function(cb) {
+          var user2 = new User2();
+          user2.p('userId', userId);
+          user2.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(user2);
+            assert.equal(user2.p('name'), user.p('name'));
+            cb();
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
   });
 
-  it('should run many jobs later success', function(done) {
-    var count = 5;
-    var updateCount = 0;
+  describe('CronJob', function() {
 
-    var users;
+    it('should run a job late success', function(done) {
+      var user = new User2();
+      user.p('userId', 1);
 
-    async.series({
-      createUsers: function(cb) {
-        helper.createUser2s(count, function(err, res) {
+      user.create(function(err) {
+        assert.ok(!err, err);
+
+        user.p('name', '0' + user.p('name'));
+        user.db.once('updated', function() {
+          done();
+        });
+        user.update(function(err) {
           assert.ok(!err, err);
-          users = res;
-          cb();
-        })
-      },
+        });
+      })
+    });
 
-      update: function(cb) {
+    it('should run many jobs later success', function(done) {
+      var count = 5;
+      var updateCount = 0;
 
-        users.forEach(function(elem) {
-          elem.db.once('updated', function(err) {
+      var users;
+
+      async.series({
+        createUsers: function(cb) {
+          helper.createUser2s(count, function(err, res) {
             assert.ok(!err, err);
-            updateCount++;
-            assert.ok(updateCount <= count, updateCount + '/' + count);
-            if (updateCount === count) {
-              cb();
-            }
+            users = res;
+            cb();
           })
-        });
+        },
 
-        async.each(
-          users,
-          function(user, cb) {
-            user.p('name', '0' + user.p('name'));
-            user.update(function(err) {
+        update: function(cb) {
+
+          users.forEach(function(elem) {
+            elem.db.once('updated', function(err) {
               assert.ok(!err, err);
-              cb();
+              updateCount++;
+              assert.ok(updateCount <= count, updateCount + '/' + count);
+              if (updateCount === count) {
+                cb();
+              }
             })
-          },
-          cb);
-      }
-    }, function(err) {
-      assert.ok(!err, err);
-      done();
-    })
-  });
+          });
 
-  it('should run many different jobs later success', function(done) {
-    var count = 5;
-    var updateCount = 0;
-    var friendCount = 5;
-    var friendUpdateCount = 0;
+          async.each(
+            users,
+            function(user, cb) {
+              user.p('name', '0' + user.p('name'));
+              user.update(function(err) {
+                assert.ok(!err, err);
+                cb();
+              })
+            },
+            function (err) {
+              assert.ok(!err, err);
+              //do not call cb here
+            });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
 
-    var users, friends;
+    it('should run many different jobs later success', function(done) {
+      var count = 5;
+      var updateCount = 0;
+      var friendCount = 5;
+      var friendUpdateCount = 0;
 
-    async.auto({
-      createUsers: function(cb) {
-        helper.createUser2s(count, function(err, res) {
-          assert.ok(!err, err);
-          users = res;
-          cb();
-        });
-      },
+      var users, friends;
 
-      createFriends: function(cb) {
-        var userId = 1;
-        var friendIds = _.range(2, 2 + friendCount);
-        helper.createFriend2s(userId, friendIds, function(err, res) {
-          assert.ok(!err, err);
-          friends = res;
-          cb();
-        })
-      },
-
-      updateUsers: ['createUsers', function(cb) {
-
-        users.forEach(function(elem) {
-          elem.db.once('updated', function(err) {
+      async.auto({
+        createUsers: function(cb) {
+          helper.createUser2s(count, function(err, res) {
             assert.ok(!err, err);
-            updateCount++;
-            assert.ok(updateCount <= count, updateCount + '/' + count);
-            if (updateCount === count) {
-              cb();
-            }
+            users = res;
+            cb();
+          });
+        },
+
+        createFriends: function(cb) {
+          var userId = 1;
+          var friendIds = _.range(2, 2 + friendCount);
+          helper.createFriend2s(userId, friendIds, function(err, res) {
+            assert.ok(!err, err);
+            friends = res;
+            cb();
           })
-        });
+        },
 
-        async.each(
-          users,
-          function(user, cb) {
-            user.p('name', '0' + user.p('name'));
-            user.update(function(err) {
+        updateUsers: ['createUsers', function(cb) {
+
+          users.forEach(function(elem) {
+            elem.db.once('updated', function(err) {
               assert.ok(!err, err);
-              cb();
+              updateCount++;
+              assert.ok(updateCount <= count, updateCount + '/' + count);
+              if (updateCount === count) {
+                cb();
+              }
             })
-          },
-          function(err) {
-            assert.ok(!err, err);
-            //don't call cb here
           });
-      }],
 
-      updateFriends: ['createFriends', function(cb) {
-
-        friends.forEach(function(elem) {
-          elem.db.once('updated', function(err) {
-            assert.ok(!err, err);
-            friendUpdateCount++;
-            assert.ok(friendUpdateCount <= friendCount);
-            if (friendUpdateCount === friendCount) {
-              cb();
-            }
-          });
-        });
-
-        async.each(
-          friends,
-          function(friend, cb) {
-            friend.p('assistTime', new Date('2014-1-1'));
-            friend.update(function(err) {
+          async.each(
+            users,
+            function(user, cb) {
+              user.p('name', '0' + user.p('name'));
+              user.update(function(err) {
+                assert.ok(!err, err);
+                cb();
+              })
+            },
+            function(err) {
               assert.ok(!err, err);
-              cb();
+              //don't call cb here
             });
-          },
-          function(err) {
-            assert.ok(!err, err);
-            //don't call cb here
+        }],
+
+        updateFriends: ['createFriends', function(cb) {
+
+          friends.forEach(function(elem) {
+            elem.db.once('updated', function(err) {
+              assert.ok(!err, err);
+              friendUpdateCount++;
+              assert.ok(friendUpdateCount <= friendCount);
+              if (friendUpdateCount === friendCount) {
+                cb();
+              }
+            });
           });
 
-        async.each(
-          friends,
-          function(friend, cb) {
-            friend.p('assistTime', new Date('2014-1-2'));
-            friend.update(function(err) {
+          async.each(
+            friends,
+            function(friend, cb) {
+              friend.p('assistTime', new Date('2014-1-1'));
+              friend.update(function(err) {
+                assert.ok(!err, err);
+                cb();
+              });
+            },
+            function(err) {
               assert.ok(!err, err);
-              cb();
+              //don't call cb here
             });
-          },
-          function(err) {
-            assert.ok(!err, err);
-            //don't call cb here
-          });
-      }],
-    }, function(err) {
-      assert.ok(!err, err);
-      done();
-    })
+
+          async.each(
+            friends,
+            function(friend, cb) {
+              friend.p('assistTime', new Date('2014-1-2'));
+              friend.update(function(err) {
+                assert.ok(!err, err);
+                cb();
+              });
+            },
+            function(err) {
+              assert.ok(!err, err);
+              //don't call cb here
+            });
+        }],
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
   });
+
 });
