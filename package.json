@@ -1,6 +1,6 @@
 {
   "name": "cg_model",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "db + cache update framework",
   "main": "./lib/index.js",
   "scripts": {
