@@ -712,7 +712,10 @@ var User2 = model.createModel({
   },
 });
 
-model.startCronJob('mysql_late', '*/1 * * * * *');
+model.set('mysql_late', {
+  cron: '*/1 * * * * *',
+  batchCount: 3,
+});
 
 helper.createUser2s = function(count, cb) {
 
@@ -814,9 +817,22 @@ describe('DataMySqlLate', function() {
         })
       }
     }, function(err) {
+
       assert.ok(!err, err);
       done();
     })
+  });
+
+  before(function(done) {
+
+    model.startCronJob('mysql_late');
+    done();
+  });
+
+  after(function(done) {
+
+    model.stopCronJob('mysql_late');
+    done();
   });
 
   it('should run a job late success', function(done) {
@@ -952,7 +968,21 @@ describe('DataMySqlLate', function() {
         async.each(
           friends,
           function(friend, cb) {
-            friend.p('assistTime', new Date());
+            friend.p('assistTime', new Date('2014-1-1'));
+            friend.update(function(err) {
+              assert.ok(!err, err);
+              cb();
+            });
+          },
+          function(err) {
+            assert.ok(!err, err);
+            //don't call cb here
+          });
+
+        async.each(
+          friends,
+          function(friend, cb) {
+            friend.p('assistTime', new Date('2014-1-2'));
             friend.update(function(err) {
               assert.ok(!err, err);
               cb();

@@ -2,8 +2,8 @@
 var mysql = require('mysql');
 var redis = require('redis');
 var model = require('../lib');
-// var debug_mode = model.debug_mode = false;
-var debug_mode = model.debug_mode = true;
+var debug_mode = model.debug_mode = false;
+// var debug_mode = model.debug_mode = true;
 
 module.exports = function(dbConfig) {
 
@@ -13,6 +13,7 @@ module.exports = function(dbConfig) {
     user: 'yqb',
     password: 'yqb',
     database: 'model_test',
+    multipleStatements: true,
     debug: debug_mode && ['ComQueryPacket'],
   });
 
