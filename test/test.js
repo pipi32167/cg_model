@@ -106,6 +106,22 @@ helper.createUsers = function(count, cb) {
     });
 }
 
+helper.checkUserLoadSuccess = function(user) {
+
+  assert.ok(user.mem.isLoaded);
+  assert.ok(user.db.isSaved);
+  assert.ok(user.cache.isSaved);
+
+  var props = user.def.props;
+  var prop;
+  for (prop in props) {
+    if (props.hasOwnProperty(prop)) {
+      assert.deepEqual(user.mem.p(prop), user.db.p(prop));
+      assert.deepEqual(user.mem.p(prop), user.cache.p(prop));
+    }
+  }
+}
+
 describe('User Model', function() {
   beforeEach(function(done) {
     User.removeAll(function(err) {
@@ -154,6 +170,7 @@ describe('User Model', function() {
             assert.equal(res.length, 1);
             assert.equal(res[0].p('userId'), userId);
             assert.equal(res[0].p('name'), name);
+            helper.checkUserLoadSuccess(res[0]);
             cb();
           });
         },
@@ -253,6 +270,40 @@ describe('User Model', function() {
             assert.ok(user.mem.isLoaded);
             assert.ok(user.db.isSaved);
             assert.ok(user.cache.isSaved);
+            cb();
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
+    it('should access by property of object success', function(done) {
+
+      var userId;
+
+      async.series({
+        create: function(cb) {
+
+          var user = new User();
+          user.create(function(err) {
+            assert.ok(!err, err);
+            userId = user.userId;
+            assert.ok(user.mem.isLoaded);
+            assert.ok(user.db.isSaved);
+            assert.ok(user.cache.isSaved);
+            cb();
+          });
+        },
+
+        load: function(cb) {
+
+          var user = new User();
+          user.userId = userId;
+          user.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkUserLoadSuccess(user);
             cb();
           });
         }
