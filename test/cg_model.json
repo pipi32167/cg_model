@@ -1,0 +1,6 @@
+{
+  "mysql_late": {
+    "cron": "*/1 * * * * *",
+    "batchCount": 3
+  }
+}

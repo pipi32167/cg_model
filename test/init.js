@@ -21,4 +21,6 @@ module.exports = function(dbConfig) {
 
   var redisClient = redis.createClient();
   model.setCacheClient(redisClient);
+
+  model.initialize(require('./cg_model'));
 }

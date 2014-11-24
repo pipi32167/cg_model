@@ -712,11 +712,6 @@ var User2 = model.createModel({
   },
 });
 
-model.set('mysql_late', {
-  cron: '*/1 * * * * *',
-  batchCount: 3,
-});
-
 helper.createUser2s = function(count, cb) {
 
   var users = [];
