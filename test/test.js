@@ -106,21 +106,29 @@ helper.createUsers = function(count, cb) {
     });
 }
 
-helper.checkUserLoadSuccess = function(user) {
+helper.checkModelIsLoaded = function(obj) {
 
-  assert.ok(user.mem.isLoaded);
-  assert.ok(user.db.isSaved);
-  assert.ok(user.cache.isSaved);
+  assert.ok(obj.mem.isLoaded);
+  assert.ok(obj.db.isSaved);
+  assert.ok(obj.cache.isSaved);
 
-  var props = user.def.props;
+  var props = obj.def.props;
   var prop;
   for (prop in props) {
     if (props.hasOwnProperty(prop)) {
-      assert.deepEqual(user.mem.p(prop), user.db.p(prop));
-      assert.deepEqual(user.mem.p(prop), user.cache.p(prop));
+      assert.deepEqual(obj.mem.p(prop), obj.db.p(prop));
+      assert.deepEqual(obj.mem.p(prop), obj.cache.p(prop));
     }
   }
 }
+
+helper.checkModelIsUnloaded = function(obj) {
+
+  assert.ok(!obj.mem.isLoaded);
+  assert.ok(!obj.db.isSaved);
+  assert.ok(!obj.cache.isSaved);
+}
+
 
 describe('User Model', function() {
   beforeEach(function(done) {
@@ -158,6 +166,7 @@ describe('User Model', function() {
             assert.ok(!err, err);
             userId = user.p('userId');
             name = user.p('name');
+            helper.checkModelIsLoaded(user);
             cb();
           });
         },
@@ -170,7 +179,7 @@ describe('User Model', function() {
             assert.equal(res.length, 1);
             assert.equal(res[0].p('userId'), userId);
             assert.equal(res[0].p('name'), name);
-            helper.checkUserLoadSuccess(res[0]);
+            helper.checkModelIsLoaded(res[0]);
             cb();
           });
         },
@@ -184,6 +193,7 @@ describe('User Model', function() {
             assert.equal(res.length, 1);
             assert.equal(res[0].p('userId'), userId);
             assert.equal(res[0].p('name'), name);
+            helper.checkModelIsLoaded(res[0]);
             cb();
           })
         }
@@ -217,6 +227,9 @@ describe('User Model', function() {
           }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, count);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
             cb();
           });
         },
@@ -230,6 +243,9 @@ describe('User Model', function() {
           }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, count);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
             cb();
           });
         }
@@ -254,9 +270,7 @@ describe('User Model', function() {
           user.create(function(err) {
             assert.ok(!err, err);
             userId = user.p('userId');
-            assert.ok(user.mem.isLoaded);
-            assert.ok(user.db.isSaved);
-            assert.ok(user.cache.isSaved);
+            helper.checkModelIsLoaded(user);
             cb();
           });
         },
@@ -270,6 +284,7 @@ describe('User Model', function() {
             assert.ok(user.mem.isLoaded);
             assert.ok(user.db.isSaved);
             assert.ok(user.cache.isSaved);
+            helper.checkModelIsLoaded(user);
             cb();
           });
         }
@@ -290,9 +305,7 @@ describe('User Model', function() {
           user.create(function(err) {
             assert.ok(!err, err);
             userId = user.userId;
-            assert.ok(user.mem.isLoaded);
-            assert.ok(user.db.isSaved);
-            assert.ok(user.cache.isSaved);
+            helper.checkModelIsLoaded(user);
             cb();
           });
         },
@@ -303,7 +316,7 @@ describe('User Model', function() {
           user.userId = userId;
           user.load(function(err) {
             assert.ok(!err, err);
-            helper.checkUserLoadSuccess(user);
+            helper.checkModelIsLoaded(user);
             cb();
           });
         }
@@ -324,9 +337,7 @@ describe('User Model', function() {
           user.create(function(err) {
             assert.ok(!err, err);
             userId = user.p('userId');
-            assert.ok(user.mem.isLoaded);
-            assert.ok(user.db.isSaved);
-            assert.ok(user.cache.isSaved);
+            helper.checkModelIsLoaded(user);
             cb();
           });
         },
@@ -336,9 +347,7 @@ describe('User Model', function() {
           user.p('userId', userId);
           user.remove(function(err) {
             assert.ok(!err, err);
-            assert.ok(!user.mem.isLoaded);
-            assert.ok(!user.db.isSaved);
-            assert.ok(!user.cache.isSaved);
+            helper.checkModelIsUnloaded(user);
             cb();
           });
         },
@@ -349,9 +358,7 @@ describe('User Model', function() {
           user.p('userId', userId);
           user.load(function(err) {
             assert.ok(!err, err);
-            assert.ok(!user.mem.isLoaded);
-            assert.ok(!user.db.isSaved);
-            assert.ok(!user.cache.isSaved);
+            helper.checkModelIsUnloaded(user);
             cb();
           });
         }
@@ -372,9 +379,7 @@ describe('User Model', function() {
           user.create(function(err) {
             assert.ok(!err, err);
             userId = user.p('userId');
-            assert.ok(user.mem.isLoaded);
-            assert.ok(user.db.isSaved);
-            assert.ok(user.cache.isSaved);
+            helper.checkModelIsLoaded(user);
             cb();
           });
         },
@@ -392,9 +397,7 @@ describe('User Model', function() {
           user2.p('userId', userId);
           user2.load(function(err) {
             assert.ok(!err, err);
-            assert.ok(user2.mem.isLoaded);
-            assert.ok(user2.db.isSaved);
-            assert.ok(user2.cache.isSaved);
+            helper.checkModelIsLoaded(user2);
             assert.equal(user2.p('name'), user.p('name'));
             cb();
           });
@@ -458,9 +461,7 @@ describe('Friend Model', function() {
               });
               friend.load(function(err) {
                 assert.ok(!err, err);
-                assert.ok(friend.mem.isLoaded);
-                assert.ok(friend.db.isSaved);
-                assert.ok(friend.cache.isSaved);
+                helper.checkModelIsLoaded(friend);
                 cb();
               })
             },
@@ -485,9 +486,7 @@ describe('Friend Model', function() {
               });
               friend.load(function(err) {
                 assert.ok(!err, err);
-                assert.ok(!friend.mem.isLoaded);
-                assert.ok(!friend.db.isSaved);
-                assert.ok(!friend.cache.isSaved);
+                helper.checkModelIsUnloaded(friend);
                 cb();
               })
             },
@@ -523,6 +522,9 @@ describe('Friend Model', function() {
           }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, 4);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
             cb();
           });
         },
@@ -533,6 +535,7 @@ describe('Friend Model', function() {
           }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, 1);
+            helper.checkModelIsLoaded(res[0]);
             cb();
           });
         },
@@ -544,6 +547,7 @@ describe('Friend Model', function() {
           }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, 1);
+            helper.checkModelIsLoaded(res[0]);
             cb();
           });
         },
@@ -555,6 +559,9 @@ describe('Friend Model', function() {
           }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, 2);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
             cb();
           });
         },
@@ -577,6 +584,9 @@ describe('Friend Model', function() {
           }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, 2);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            });
             cb();
           });
         },
@@ -602,6 +612,7 @@ describe('Friend Model', function() {
           });
           friend1.create(function(err) {
             assert.ok(!err, err);
+            helper.checkModelIsLoaded(friend1);
             cb();
           });
         },
@@ -616,6 +627,7 @@ describe('Friend Model', function() {
           friend2.load(function(err) {
             assert.ok(!err, err);
             assert.equal(friend2.p('type'), friend1.p('type'));
+            helper.checkModelIsLoaded(friend2);
             cb();
           });
         }
@@ -637,6 +649,7 @@ describe('Friend Model', function() {
           });
           friend1.create(function(err) {
             assert.ok(!err, err);
+            helper.checkModelIsLoaded(friend1);
             cb();
           });
         },
@@ -644,6 +657,7 @@ describe('Friend Model', function() {
         remove: function(cb) {
           friend1.remove(function(err) {
             assert.ok(!err, err);
+            helper.checkModelIsUnloaded(friend1);
             cb();
           });
         },
@@ -656,9 +670,7 @@ describe('Friend Model', function() {
           });
           friend2.load(function(err) {
             assert.ok(!err, err);
-            assert.ok(!friend2.mem.isLoaded);
-            assert.ok(!friend2.db.isSaved);
-            assert.ok(!friend2.cache.isSaved);
+            helper.checkModelIsUnloaded(friend2);
             cb();
           });
         },
@@ -681,6 +693,7 @@ describe('Friend Model', function() {
           });
           friend1.create(function(err) {
             assert.ok(!err, err);
+            helper.checkModelIsLoaded(friend1);
             cb();
           });
         },
@@ -702,9 +715,7 @@ describe('Friend Model', function() {
           });
           friend2.load(function(err) {
             assert.ok(!err, err);
-            assert.ok(friend2.mem.isLoaded);
-            assert.ok(friend2.db.isSaved);
-            assert.ok(friend2.cache.isSaved);
+            helper.checkModelIsLoaded(friend2);
             assert.equal(friend2.p('assistTime'), friend1.p('assistTime'));
             cb();
           });
