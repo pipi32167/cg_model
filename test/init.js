@@ -14,7 +14,7 @@ module.exports = function(dbConfig) {
     password: 'yqb',
     database: 'model_test',
     multipleStatements: true,
-    debug: debug_mode && ['ComQueryPacket'],
+    debug: ['ComQueryPacket'],
   });
 
   model.setDBClient(pool);
