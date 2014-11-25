@@ -718,6 +718,57 @@ describe('Item Model', function() {
           done();
         });
     });
+
+    it('should create item success even specified the auto increment primary key', function(done) {
+      var itemInfo = {
+        id: 100,
+        itemId: 100,
+      };
+      async.series({
+
+        createItem: function(cb) {
+
+          var item = new Item();
+          item.p(itemInfo);
+          item.create(function(err) {
+
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            assert.deepEqual(item.id, itemInfo.id);
+            cb();
+          });
+        },
+
+        check: function(cb) {
+
+          var item = new Item();
+          item.id = itemInfo.id;
+          item.load(function(err) {
+
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            assert.deepEqual(item.itemId, itemInfo.itemId);
+            cb();
+          });
+        },
+
+        createItem2: function(cb) {
+
+          var item = new Item();
+          item.itemId = itemInfo.itemId;
+          item.create(function(err) {
+
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            assert.deepEqual(item.id, itemInfo.id + 1);
+            cb();
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
   });
 });
 
