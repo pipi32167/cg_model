@@ -2,96 +2,20 @@
 var _ = require('underscore');
 var assert = require('assert');
 var async = require('async');
-require('./init')();
-var model = require('../lib');
+var CGModel = require('../lib');
+require('./init');
+require('./models');
 
-var User = model.createModel({
-  name: 'User',
+CGModel.debug_mode = false;
 
-  props: {
-    userId: {
-      type: 'number',
-      primary: true,
-      defaultValue: function(cb) {
-        var sql = 'call gen_userId(1)';
-        this.db.conn.query(sql, [], function(err, res) {
-          if (!!err) {
-            cb(err);
-            return;
-          }
-          cb(null, res[0][0].id);
-        });
-      }
-    },
-    name: {
-      type: 'string',
-      unique: true,
-      defaultValue: function(cb) {
-        cb(null, 'test' + this.p('userId'));
-      }
-    },
+var User = CGModel.getModel('User');
+var User2 = CGModel.getModel('User2');
+var Friend = CGModel.getModel('Friend');
+var Friend2 = CGModel.getModel('Friend2');
+var Item = CGModel.getModel('Item');
 
-    money: {
-      type: 'number',
-      sync: true,
-      defaultValue: 0,
-    },
+before(function() {});
 
-    registerTime: {
-      type: 'date',
-      defaultValue: function(cb) {
-        cb(null, new Date());
-      }
-    },
-  },
-
-  db: {
-    type: 'mysql',
-    tbl_name: 'user',
-  },
-
-  cache: {
-    type: 'redis',
-    name: 'user',
-    prefix: 'test',
-  },
-});
-
-var Friend = model.createModel({
-
-  name: 'Friend',
-
-  props: {
-    userId: {
-      type: 'number',
-      primary: true,
-    },
-    friendId: {
-      type: 'number',
-      primary: true,
-    },
-    type: {
-      type: 'number',
-    },
-    assistTime: {
-      type: 'date',
-      defaultValue: function(cb) {
-        cb(null, new Date('2001-1-1'));
-      }
-    },
-  },
-
-  db: {
-    type: 'mysql',
-    tbl_name: 'friend',
-  },
-
-  cache: {
-    type: 'redis',
-    name: 'friend',
-    prefix: 'test',
-  },
-});
 
 var helper = {};
 helper.createUsers = function(count, cb) {
@@ -269,7 +193,7 @@ describe('User Model', function() {
       }, function(err) {
         assert.ok(!err, err);
         done();
-      })
+      });
     });
   });
 
@@ -744,57 +668,57 @@ describe('Friend Model', function() {
   });
 });
 
-var User2 = model.createModel({
-  name: 'User2',
+describe('Item Model', function() {
+  beforeEach(function(done) {
+    Item.removeAll(function(err) {
+      assert.ok(!err, err);
+      done();
+    });
+  });
 
-  props: {
-    userId: {
-      type: 'number',
-      primary: true,
-      defaultValue: function(cb) {
-        var sql = 'call gen_userId(1)';
-        this.db.conn.query(sql, [], function(err, res) {
-          if (!!err) {
-            cb(err);
-            return;
-          }
-          cb(null, res[0][0].id);
+  describe('auto increment', function() {
+    it('should create an item with an auto increment id', function(done) {
+
+      var item = new Item();
+      item.p('itemId', 100);
+      item.create(function(err) {
+        assert.ok(!err, err);
+        helper.checkModelIsLoaded(item);
+        assert.ok(item.id !== undefined);
+        done();
+      })
+    });
+
+    it('should create an item failed when not provide all required properties', function(done) {
+
+      var item = new Item();
+      item.create(function(err) {
+        assert.ok(!!err, err);
+        assert.ok(item.id === undefined);
+        done();
+      });
+    });
+
+    it('should create many items success', function(done) {
+      async.times(
+        10,
+        function(idx, cb) {
+          var item = new Item();
+          item.itemId = 100;
+          item.create(function(err) {
+
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            assert.ok(item.id !== undefined);
+            cb();
+          })
+        },
+        function(err) {
+          assert.ok(!err, err);
+          done();
         });
-      }
-    },
-
-    name: {
-      type: 'string',
-      unique: true,
-      defaultValue: function(cb) {
-        cb(null, 'test' + this.p('userId'));
-      }
-    },
-
-    money: {
-      type: 'number',
-      sync: true,
-      defaultValue: 0,
-    },
-
-    registerTime: {
-      type: 'date',
-      defaultValue: function(cb) {
-        cb(null, new Date());
-      }
-    },
-  },
-
-  db: {
-    type: 'mysql_late',
-    tbl_name: 'user',
-  },
-
-  cache: {
-    type: 'redis',
-    name: 'user',
-    prefix: 'test',
-  },
+    });
+  });
 });
 
 helper.createUser2s = function(count, cb) {
@@ -816,42 +740,6 @@ helper.createUser2s = function(count, cb) {
       cb(null, users);
     });
 }
-
-var Friend2 = model.createModel({
-
-  name: 'Friend2',
-
-  props: {
-    userId: {
-      type: 'number',
-      primary: true,
-    },
-    friendId: {
-      type: 'number',
-      primary: true,
-    },
-    type: {
-      type: 'number',
-    },
-    assistTime: {
-      type: 'date',
-      defaultValue: function(cb) {
-        cb(null, new Date('2001-1-1'));
-      }
-    },
-  },
-
-  db: {
-    type: 'mysql_late',
-    tbl_name: 'friend',
-  },
-
-  cache: {
-    type: 'redis',
-    name: 'friend',
-    prefix: 'test',
-  },
-});
 
 helper.createFriend2s = function(userId, friendIds, cb) {
   var friends = [];
@@ -905,13 +793,13 @@ describe('DataMySqlLate', function() {
 
   before(function(done) {
 
-    model.startCronJob('mysql_late');
+    CGModel.startCronJob('mysql_late');
     done();
   });
 
   after(function(done) {
 
-    model.stopCronJob('mysql_late');
+    CGModel.stopCronJob('mysql_late');
     done();
   });
 
