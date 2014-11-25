@@ -14,9 +14,6 @@ var Friend = CGModel.getModel('Friend');
 var Friend2 = CGModel.getModel('Friend2');
 var Item = CGModel.getModel('Item');
 
-before(function() {});
-
-
 var helper = {};
 helper.createUsers = function(count, cb) {
   var res = [];
@@ -656,7 +653,7 @@ describe('Friend Model', function() {
           friend2.load(function(err) {
             assert.ok(!err, err);
             helper.checkModelIsLoaded(friend2);
-            assert.equal(friend2.p('assistTime'), friend1.p('assistTime'));
+            assert.deepEqual(friend2.p('assistTime'), friend1.p('assistTime'));
             cb();
           });
         },
@@ -678,13 +675,39 @@ describe('Item Model', function() {
 
   describe('auto increment', function() {
     it('should create an item with an auto increment id', function(done) {
+      var id;
+      var item;
+      async.series({
+        create: function(cb) {
 
-      var item = new Item();
-      item.p('itemId', 100);
-      item.create(function(err) {
+          item = new Item();
+          item.p('itemId', 100);
+          item.create(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            assert.ok(item.id !== undefined);
+            assert.ok(item.isLock !== undefined);
+            id = item.id;
+            cb();
+          });
+        },
+
+        checkCache: function(cb) {
+          var itemInCache = new Item();
+          itemInCache.id = id;
+          itemInCache.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(itemInCache.mem.isLoaded);
+            for (var prop in Item.def.props) {
+              if (Item.def.props.hasOwnProperty(prop)) {
+                assert.deepEqual(itemInCache.p(prop), item.p(prop))
+              }
+            }
+            cb();
+          });
+        }
+      }, function(err) {
         assert.ok(!err, err);
-        helper.checkModelIsLoaded(item);
-        assert.ok(item.id !== undefined);
         done();
       })
     });

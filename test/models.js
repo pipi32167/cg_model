@@ -122,6 +122,7 @@ CGModel.createModel({
   props: {
     id:               { type: 'number', primary: true, autoIncr: true },
     itemId:           { type: 'number', index: true, },
+    isLock:           { type: 'bool', defaultValue: false },
   },
 
   db: {
