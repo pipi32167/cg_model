@@ -163,15 +163,14 @@ describe('User Model', function() {
     });
 
     it('should find a user success', function(done) {
-      var userId, name;
+      var expect;
       async.series({
 
         createUser: function(cb) {
           var user = new User();
           user.create(function(err) {
             assert.ok(!err, err);
-            userId = user.p('userId');
-            name = user.p('name');
+            expect = user.p(['userId', 'name'])
             helper.checkModelIsLoaded(user);
             cb();
           });
@@ -179,12 +178,12 @@ describe('User Model', function() {
 
         findUserByUserId: function(cb) {
           User.find({
-            userId: userId
+            userId: expect.userId
           }, function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, 1);
-            assert.equal(res[0].p('userId'), userId);
-            assert.equal(res[0].p('name'), name);
+            assert.equal(res[0].p('userId'), expect.userId);
+            assert.equal(res[0].p('name'), expect.name);
             helper.checkModelIsLoaded(res[0]);
             cb();
           });
@@ -192,13 +191,13 @@ describe('User Model', function() {
 
         findUserByName: function(cb) {
           User.find({
-            name: name
+            name: expect.name
           }, function(err, res) {
 
             assert.ok(!err, err);
             assert.equal(res.length, 1);
-            assert.equal(res[0].p('userId'), userId);
-            assert.equal(res[0].p('name'), name);
+            assert.equal(res[0].p('userId'), expect.userId);
+            assert.equal(res[0].p('name'), expect.name);
             helper.checkModelIsLoaded(res[0]);
             cb();
           })
@@ -1435,5 +1434,4 @@ describe('DataMySqlLate', function() {
       })
     });
   });
-
 });
