@@ -29,8 +29,14 @@ var User = model.createModel({
       defaultValue: function(cb) {
         cb(null, 'test' + this.p('userId'));
       }
-
     },
+
+    money: {
+      type: 'number',
+      sync: true,
+      defaultValue: 0,
+    },
+
     registerTime: {
       type: 'date',
       defaultValue: function(cb) {
@@ -757,14 +763,21 @@ var User2 = model.createModel({
         });
       }
     },
+
     name: {
       type: 'string',
       unique: true,
       defaultValue: function(cb) {
         cb(null, 'test' + this.p('userId'));
       }
-
     },
+
+    money: {
+      type: 'number',
+      sync: true,
+      defaultValue: 0,
+    },
+
     registerTime: {
       type: 'date',
       defaultValue: function(cb) {
@@ -1191,20 +1204,84 @@ describe('DataMySqlLate', function() {
 
   describe('CronJob', function() {
 
-    it('should run a job late success', function(done) {
-      var user = new User2();
-      user.p('userId', 1);
+    it('should run a job later success', function(done) {
 
-      user.create(function(err) {
+      var userId = 1;
+      var registerTime = new Date('2014-1-1');
+
+      async.series({
+        create: function(cb) {
+          var user = new User2();
+          user.p('userId', userId);
+
+          user.create(function(err) {
+            assert.ok(!err, err);
+
+            user.p('registerTime', registerTime);
+            user.db.once('updated', function() {
+              done();
+            });
+            user.update(function(err) {
+              assert.ok(!err, err);
+            });
+          });
+        },
+
+        check: function(cb) {
+          var user = new User2();
+          user.p('userId', userId);
+
+          user.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(user);
+
+            assert.equal(user.registerTime, registerTime);
+            cb();
+          });
+        }
+      }, function(err) {
         assert.ok(!err, err);
+        done();
+      })
+    });
 
-        user.p('name', '0' + user.p('name'));
-        user.db.once('updated', function() {
-          done();
-        });
-        user.update(function(err) {
-          assert.ok(!err, err);
-        });
+    it('should run a job immedately success', function(done) {
+
+      var userId = 1;
+      var registerTime = new Date('2014-1-1');
+      var money;
+
+      async.series({
+        create: function(cb) {
+          var user = new User2();
+          user.p('userId', userId);
+
+          user.create(function(err) {
+            assert.ok(!err, err);
+
+            user.money += 1;
+            money = user.money;
+            user.update(function(err) {
+              assert.ok(!err, err);
+              cb(); //it should update immediately
+            });
+          });
+        },
+
+        check: function(cb) {
+          var user = new User2();
+          user.p('userId', userId);
+
+          user.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(user);
+            assert.equal(user.money, money);
+            cb();
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
       })
     });
 
@@ -1239,13 +1316,13 @@ describe('DataMySqlLate', function() {
           async.each(
             users,
             function(user, cb) {
-              user.p('name', '0' + user.p('name'));
+              user.p('registerTime', new Date('2014-1-1'));
               user.update(function(err) {
                 assert.ok(!err, err);
                 cb();
               })
             },
-            function (err) {
+            function(err) {
               assert.ok(!err, err);
               //do not call cb here
             });
