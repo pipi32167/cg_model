@@ -746,6 +746,9 @@ describe('Item Model', function() {
       var itemInfo = {
         id: 100,
         itemId: 100,
+        isLock: false,
+        desc: 'xx',
+        updateTime: new Date(),
       };
       async.series({
 
@@ -762,6 +765,7 @@ describe('Item Model', function() {
           });
         },
 
+        //check cache
         check: function(cb) {
 
           var item = new Item();
@@ -771,6 +775,36 @@ describe('Item Model', function() {
             assert.ok(!err, err);
             helper.checkModelIsLoaded(item);
             assert.deepEqual(item.itemId, itemInfo.itemId);
+            assert.deepEqual(item.isLock, itemInfo.isLock);
+            assert.deepEqual(item.desc, itemInfo.desc);
+            assert.deepEqual(item.updateTime, itemInfo.updateTime);
+            cb();
+          });
+        },
+
+        removeFromCache: function(cb) {
+
+          var item = new Item();
+          item.id = itemInfo.id;
+          item.cache.remove(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        //check db
+        check2: function(cb) {
+
+          var item = new Item();
+          item.id = itemInfo.id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            // console.log(item.toJSON());
+            helper.checkModelIsLoaded(item);
+            assert.deepEqual(item.itemId, itemInfo.itemId);
+            assert.deepEqual(item.isLock, itemInfo.isLock);
+            assert.deepEqual(item.desc, itemInfo.desc);
+            assert.deepEqual(item.updateTime, new Date(Math.round(itemInfo.updateTime.getTime()/1000)*1000)); //lose precision when save into mysql
             cb();
           });
         },
@@ -784,6 +818,7 @@ describe('Item Model', function() {
             assert.ok(!err, err);
             helper.checkModelIsLoaded(item);
             assert.deepEqual(item.id, itemInfo.id + 1);
+            assert.deepEqual(item.itemId, itemInfo.itemId);
             cb();
           });
         }

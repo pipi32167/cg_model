@@ -123,6 +123,8 @@ CGModel.createModel({
     id:               { type: 'number', primary: true, autoIncr: true },
     itemId:           { type: 'number', index: true, },
     isLock:           { type: 'bool', defaultValue: false },
+    desc:             { type: 'string', defaultValue: '' },
+    updateTime:       { type: 'date', defaultValue: new Date('2014-1-1'), }
   },
 
   db: {
