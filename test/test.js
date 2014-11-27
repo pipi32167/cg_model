@@ -1,4 +1,5 @@
 'use strict';
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var _ = require('underscore');
 var assert = require('assert');
@@ -666,13 +667,19 @@ describe('Friend Model', function() {
   });
 });
 
-var ItemSub = function() {
-  Item.call(this);
+var ItemSuper = function () {
+  
 }
 
-_.extend(ItemSub, Item);
+var ItemSub = function() {
+  Item.call(this);
+  ItemSuper.call(this);
+  EventEmitter.call(this);
+}
 
-util.inherits(ItemSub, Item);
+_.extend(ItemSub.prototype, Item.prototype);
+_.extend(ItemSub.prototype, ItemSuper.prototype);
+_.extend(ItemSub.prototype, EventEmitter.prototype);
 
 describe('Item Model', function() {
   beforeEach(function(done) {
@@ -808,7 +815,7 @@ describe('Item Model', function() {
           item.id = itemInfo.id;
           item.load(function(err) {
             assert.ok(!err, err);
-            // console.log(item.toJSON());
+            // console.log(item.toModelJSON());
             helper.checkModelIsLoaded(item);
             assert.deepEqual(item.itemId, itemInfo.itemId);
             assert.deepEqual(item.isLock, itemInfo.isLock);
