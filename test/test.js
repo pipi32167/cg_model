@@ -76,7 +76,7 @@ describe('User Model', function() {
     });
 
     it('should find no users success', function(done) {
-      User.find({
+      User.load({
         userId: 1
       }, function(err, res) {
         assert.ok(!err, err);
@@ -100,7 +100,7 @@ describe('User Model', function() {
         },
 
         findUserByUserId: function(cb) {
-          User.find({
+          User.load({
             userId: expect.userId
           }, function(err, res) {
             assert.ok(!err, err);
@@ -113,7 +113,7 @@ describe('User Model', function() {
         },
 
         findUserByName: function(cb) {
-          User.find({
+          User.load({
             name: expect.name
           }, function(err, res) {
 
@@ -150,7 +150,7 @@ describe('User Model', function() {
           var userIds = _(users).map(function(elem) {
             return elem.p('userId');
           });
-          User.find({
+          User.load({
             userId: userIds
           }, function(err, res) {
             assert.ok(!err, err);
@@ -166,7 +166,7 @@ describe('User Model', function() {
           var names = _(users).map(function(elem) {
             return elem.p('name');
           });
-          User.find({
+          User.load({
             name: names
           }, function(err, res) {
             assert.ok(!err, err);
@@ -179,7 +179,7 @@ describe('User Model', function() {
         },
 
         findAll: function(cb) {
-          User.findAll(function(err, res) {
+          User.loadAll(function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, count);
             res.forEach(function(elem) {
@@ -438,7 +438,7 @@ describe('Friend Model', function() {
     });
 
     it('should find no friends success', function(done) {
-      Friend.find({
+      Friend.load({
         userId: 1
       }, function(err, res) {
         assert.ok(!err, err);
@@ -456,7 +456,7 @@ describe('Friend Model', function() {
         },
 
         find: function(cb) {
-          Friend.find({
+          Friend.load({
             userId: 1
           }, function(err, res) {
             assert.ok(!err, err);
@@ -469,7 +469,7 @@ describe('Friend Model', function() {
         },
 
         find2: function(cb) {
-          Friend.find({
+          Friend.load({
             friendId: 2
           }, function(err, res) {
             assert.ok(!err, err);
@@ -480,7 +480,7 @@ describe('Friend Model', function() {
         },
 
         find3: function(cb) {
-          Friend.find({
+          Friend.load({
             userId: 1,
             friendId: 2
           }, function(err, res) {
@@ -492,7 +492,7 @@ describe('Friend Model', function() {
         },
 
         find4: function(cb) {
-          Friend.find({
+          Friend.load({
             userId: 1,
             friendId: [2, 3]
           }, function(err, res) {
@@ -506,7 +506,7 @@ describe('Friend Model', function() {
         },
 
         find5: function(cb) {
-          Friend.find({
+          Friend.load({
             userId: 2,
             friendId: [2, 3]
           }, function(err, res) {
@@ -517,7 +517,7 @@ describe('Friend Model', function() {
         },
 
         find6: function(cb) {
-          Friend.find({
+          Friend.load({
             userId: [1, 2],
             friendId: [1, 2, 3]
           }, function(err, res) {
@@ -1024,7 +1024,7 @@ describe('DataMySqlLate', function() {
     });
 
     it('should find no users success', function(done) {
-      User2.find({
+      User2.load({
         userId: 1
       }, function(err, res) {
         assert.ok(!err, err);
@@ -1049,7 +1049,7 @@ describe('DataMySqlLate', function() {
         },
 
         findUserByUserId: function(cb) {
-          User2.find({
+          User2.load({
             userId: userId
           }, function(err, res) {
             assert.ok(!err, err);
@@ -1062,7 +1062,7 @@ describe('DataMySqlLate', function() {
         },
 
         findUserByName: function(cb) {
-          User2.find({
+          User2.load({
             name: name
           }, function(err, res) {
 
@@ -1099,7 +1099,7 @@ describe('DataMySqlLate', function() {
           var userIds = _(users).map(function(elem) {
             return elem.p('userId');
           });
-          User2.find({
+          User2.load({
             userId: userIds
           }, function(err, res) {
             assert.ok(!err, err);
@@ -1115,7 +1115,7 @@ describe('DataMySqlLate', function() {
           var names = _(users).map(function(elem) {
             return elem.p('name');
           });
-          User2.find({
+          User2.load({
             name: names
           }, function(err, res) {
             assert.ok(!err, err);
@@ -1128,7 +1128,7 @@ describe('DataMySqlLate', function() {
         },
 
         findAll: function(cb) {
-          User2.findAll(function(err, res) {
+          User2.loadAll(function(err, res) {
             assert.ok(!err, err);
             assert.equal(res.length, count);
             res.forEach(function(elem) {
