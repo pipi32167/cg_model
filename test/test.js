@@ -1,4 +1,5 @@
 'use strict';
+var util = require('util');
 var _ = require('underscore');
 var assert = require('assert');
 var async = require('async');
@@ -665,6 +666,14 @@ describe('Friend Model', function() {
   });
 });
 
+var ItemSub = function() {
+  Item.call(this);
+}
+
+_.extend(ItemSub, Item);
+
+util.inherits(ItemSub, Item);
+
 describe('Item Model', function() {
   beforeEach(function(done) {
     Item.removeAll(function(err) {
@@ -804,7 +813,7 @@ describe('Item Model', function() {
             assert.deepEqual(item.itemId, itemInfo.itemId);
             assert.deepEqual(item.isLock, itemInfo.isLock);
             assert.deepEqual(item.desc, itemInfo.desc);
-            assert.deepEqual(item.updateTime, new Date(Math.round(itemInfo.updateTime.getTime()/1000)*1000)); //lose precision when save into mysql
+            assert.deepEqual(item.updateTime, new Date(Math.round(itemInfo.updateTime.getTime() / 1000) * 1000)); //lose precision when save into mysql
             cb();
           });
         },
@@ -823,6 +832,92 @@ describe('Item Model', function() {
           });
         }
       }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+  });
+
+  describe('sub class', function() {
+    it('should call CRUD success', function(done) {
+      var id;
+      var item;
+      async.series({
+        create: function(cb) {
+          item = new ItemSub();
+          item.itemId = 100;
+          item.create(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            id = item.id;
+            cb();
+          });
+        },
+
+        load: function(cb) {
+          item = new ItemSub();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            cb();
+          });
+        },
+
+        update: function(cb) {
+          item.isLock = true;
+          item.update(function(err) {
+            assert.ok(!err, err);
+            cb();
+          })
+        },
+
+        checkUpdateCache: function(cb) {
+          var item = new ItemSub();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            assert.ok(item.isLock);
+            cb();
+          });
+        },
+
+        removeFromCache: function(cb) {
+          item.cache.remove(function(err) {
+            assert.ok(!err, err);
+            cb();
+          })
+        },
+
+        checkUpdateDB: function(cb) {
+          var item = new ItemSub();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            assert.ok(item.isLock);
+            cb();
+          });
+        },
+
+        remove: function(cb) {
+          item.remove(function(err) {
+            assert.ok(!err, err);
+            cb();
+          })
+        },
+
+        checkRemove: function(cb) {
+          var item = new ItemSub();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsUnloaded(item);
+            cb();
+          });
+        }
+      }, function (err) {
         assert.ok(!err, err);
         done();
       })
