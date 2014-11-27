@@ -1,0 +1,17 @@
+{
+  "model_test": {
+    "connectionLimit": 10,
+    "host": "localhost",
+    "port": 3306,
+    "user": "yqb",
+    "password": "yqb",
+    "database": "model_test",
+    "multipleStatements": true
+  },
+  "debug_1": {
+    "debug": ["ComQueryPacket"]
+  },
+  "debug_2": {
+    "debug": ["ComQueryPacket", "OkPacket"]
+  }
+}

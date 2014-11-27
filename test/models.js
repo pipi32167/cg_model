@@ -33,11 +33,13 @@ CGModel.createModel({
 
   db: {
     type: 'mysql',
+    db_name: 'model_test',
     tbl_name: 'user',
   },
 
   cache: {
     type: 'redis',
+    cache_name: 'model_test',
     name: 'user',
     prefix: 'test',
   },
@@ -55,11 +57,13 @@ CGModel.createModel({
 
   db: {
     type: 'mysql_late',
+    db_name: 'model_test',
     tbl_name: 'user',
   },
 
   cache: {
     type: 'redis',
+    cache_name: 'model_test',
     name: 'user',
     prefix: 'test',
   },
@@ -82,11 +86,13 @@ CGModel.createModel({
 
   db: {
     type: 'mysql',
+    db_name: 'model_test',
     tbl_name: 'friend',
   },
 
   cache: {
     type: 'redis',
+    cache_name: 'model_test',
     name: 'friend',
     prefix: 'test',
   },
@@ -105,11 +111,13 @@ CGModel.createModel({
 
   db: {
     type: 'mysql_late',
+    db_name: 'model_test',
     tbl_name: 'friend',
   },
 
   cache: {
     type: 'redis',
+    cache_name: 'model_test',
     name: 'friend',
     prefix: 'test',
   },
@@ -129,11 +137,13 @@ CGModel.createModel({
 
   db: {
     type: 'mysql',
+    db_name: 'model_test',
     tbl_name: 'item',
   },
 
   cache: {
     type: 'redis',
+    cache_name: 'model_test',
     name: 'item',
     prefix: 'test',
   },

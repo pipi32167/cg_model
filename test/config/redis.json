@@ -1,0 +1,6 @@
+{
+  "model_test": {
+    "host": "localhost",
+    "port": 6379
+  }
+}

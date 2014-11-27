@@ -4,21 +4,13 @@ var redis = require('redis');
 var CGModel = require('../lib');
 
 // CGModel.debug_mode = true;
+var dbName = 'model_test';
+var mysqlConfig = require('./config/mysql')[dbName];
+var pool = mysql.createPool(mysqlConfig);
+CGModel.setDBClient(dbName, pool);
 
-var pool = mysql.createPool({
-  connectionLimit: 10,
-  host: 'localhost',
-  user: 'yqb',
-  password: 'yqb',
-  database: 'model_test',
-  multipleStatements: true,
-  // debug: ['ComQueryPacket'],
-  // debug: ['ComQueryPacket', 'OkPacket'],
-});
+var redisConfig = require('./config/redis')[dbName];
+var redisClient = redis.createClient(redisConfig.port, redisConfig.host);
+CGModel.setCacheClient(dbName, redisClient);
 
-CGModel.setDBClient(pool);
-
-var redisClient = redis.createClient();
-CGModel.setCacheClient(redisClient);
-
-CGModel.initialize(require('./cg_model'));
+CGModel.initialize(require('./config/cg_model'));
