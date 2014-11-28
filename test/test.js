@@ -667,8 +667,8 @@ describe('Friend Model', function() {
   });
 });
 
-var ItemSuper = function () {
-  
+var ItemSuper = function() {
+
 }
 
 var ItemSub = function() {
@@ -728,14 +728,13 @@ describe('Item Model', function() {
       })
     });
 
-    it('should create an item failed when not provide all required properties', function(done) {
+    it('should create an item failed when not provide all required properties', function() {
 
       var item = new Item();
-      item.create(function(err) {
-        assert.ok(!!err, err);
-        assert.ok(item.id === undefined);
-        done();
+      assert.throws(function() {
+        item.create(function() {});
       });
+
     });
 
     it('should create many items success', function(done) {
@@ -924,7 +923,7 @@ describe('Item Model', function() {
             cb();
           });
         }
-      }, function (err) {
+      }, function(err) {
         assert.ok(!err, err);
         done();
       })

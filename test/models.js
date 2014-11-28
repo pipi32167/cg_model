@@ -132,7 +132,9 @@ CGModel.createModel({
     itemId:           { type: 'number', index: true, },
     isLock:           { type: 'bool', defaultValue: false },
     desc:             { type: 'string', defaultValue: '' },
-    updateTime:       { type: 'date', defaultValue: new Date('2014-1-1'), }
+    updateTime:       { type: 'date', defaultValue: new Date('2014-1-1'), },
+    properties1:      { type: 'object', defaultValue: {}, },
+    properties2:      { type: 'array', defaultValue: [], },
   },
 
   db: {
