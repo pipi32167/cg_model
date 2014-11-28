@@ -9,9 +9,11 @@
     "multipleStatements": true
   },
   "debug_1": {
-    "debug": ["ComQueryPacket"]
+    "debug": ["ComQueryPacket"],
+    "desc": "to be copy"
   },
   "debug_2": {
-    "debug": ["ComQueryPacket", "OkPacket"]
+    "debug": ["ComQueryPacket", "OkPacket"],
+    "desc": "to be copy"
   }
 }

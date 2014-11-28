@@ -324,7 +324,10 @@ describe('User Model', function() {
         },
 
         update: function(cb) {
-          user.p('name', '0' + user.p('name'));
+          user.p({
+            userId: user.userId,
+            name: '0' + user.name,
+          });
           user.update(function(err) {
             assert.ok(!err, err);
             cb();
@@ -1257,7 +1260,7 @@ describe('DataMySqlLate', function() {
 
     it('should update user success', function(done) {
 
-      var userId, user;
+      var userId, user, name;
 
       async.series({
         create: function(cb) {
@@ -1265,14 +1268,19 @@ describe('DataMySqlLate', function() {
           user = new User2();
           user.create(function(err) {
             assert.ok(!err, err);
-            userId = user.p('userId');
+            userId = user.userId;
+            name = user.name;
             helper.checkModelIsLoaded(user);
             cb();
           });
         },
 
         update: function(cb) {
-          user.p('name', '0' + user.p('name'));
+          user = new User2();
+          user.p({
+            userId: userId,
+            name: '0' + name,
+          });
           user.db.once('updated', function(err) {
             assert.ok(!err, err);
             cb();
