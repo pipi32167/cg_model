@@ -150,3 +150,31 @@ CGModel.createModel({
     prefix: 'test',
   },
 })
+
+CGModel.createModel({
+
+  name: 'Item2',
+
+  props: {
+    id:               { type: 'number', primary: true, autoIncr: true },
+    itemId:           { type: 'number', index: true, },
+    isLock:           { type: 'bool', defaultValue: false },
+    desc:             { type: 'string', defaultValue: '' },
+    updateTime:       { type: 'date', defaultValue: new Date('2014-1-1'), },
+    properties1:      { type: 'object', defaultValue: {}, },
+    properties2:      { type: 'array', defaultValue: [], },
+  },
+
+  db: {
+    type: 'mysql_late',
+    db_name: 'model_test',
+    tbl_name: 'item',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'model_test',
+    name: 'item',
+    prefix: 'test',
+  },
+})

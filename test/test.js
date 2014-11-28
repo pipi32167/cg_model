@@ -15,6 +15,7 @@ var User2 = CGModel.getModel('User2');
 var Friend = CGModel.getModel('Friend');
 var Friend2 = CGModel.getModel('Friend2');
 var Item = CGModel.getModel('Item');
+var Item2 = CGModel.getModel('Item2');
 
 var helper = {};
 helper.createUsers = function(count, cb) {
@@ -967,9 +968,7 @@ helper.createFriend2s = function(userId, friendIds, cb) {
       });
       friend.create(function(err) {
         assert.ok(!err, err);
-        assert.ok(friend.mem.isLoaded);
-        assert.ok(friend.db.isSaved);
-        assert.ok(friend.cache.isSaved);
+        helper.checkModelIsLoaded(friend);
         friends.push(friend);
         cb();
       });
@@ -978,6 +977,29 @@ helper.createFriend2s = function(userId, friendIds, cb) {
       assert.ok(!err, err);
       cb(null, friends);
     });
+}
+
+helper.createItem2s = function(ids, cb) {
+  var items = [];
+  async.eachSeries(
+    ids,
+    function(id, cb) {
+      var item = new Item2();
+      item.p({
+        id: id,
+        itemId: 100,
+      });
+      item.create(function(err) {
+        assert.ok(!err, err);
+        helper.checkModelIsLoaded(item);
+        items.push(item);
+        cb();
+      });
+    },
+    function(err) {
+      assert.ok(!err, err);
+      cb(null, items);
+    })
 }
 
 describe('DataMySqlLate', function() {
@@ -996,7 +1018,14 @@ describe('DataMySqlLate', function() {
           assert.ok(!err, err);
           cb();
         })
-      }
+      },
+
+      clearItem: function(cb) {
+        Item.removeAll(function(err) {
+          assert.ok(!err, err);
+          cb();
+        });
+      },
     }, function(err) {
 
       assert.ok(!err, err);
@@ -1443,8 +1472,10 @@ describe('DataMySqlLate', function() {
       var updateCount = 0;
       var friendCount = 5;
       var friendUpdateCount = 0;
+      var itemCount = 5;
+      var itemUpdateCount = 0;
 
-      var users, friends;
+      var users, friends, items;
 
       async.auto({
         createUsers: function(cb) {
@@ -1455,15 +1486,6 @@ describe('DataMySqlLate', function() {
           });
         },
 
-        createFriends: function(cb) {
-          var userId = 1;
-          var friendIds = _.range(2, 2 + friendCount);
-          helper.createFriend2s(userId, friendIds, function(err, res) {
-            assert.ok(!err, err);
-            friends = res;
-            cb();
-          })
-        },
 
         updateUsers: ['createUsers', function(cb) {
 
@@ -1492,6 +1514,17 @@ describe('DataMySqlLate', function() {
               //don't call cb here
             });
         }],
+
+
+        createFriends: function(cb) {
+          var userId = 1;
+          var friendIds = _.range(2, 2 + friendCount);
+          helper.createFriend2s(userId, friendIds, function(err, res) {
+            assert.ok(!err, err);
+            friends = res;
+            cb();
+          });
+        },
 
         updateFriends: ['createFriends', function(cb) {
 
@@ -1525,6 +1558,67 @@ describe('DataMySqlLate', function() {
             function(friend, cb) {
               friend.p('assistTime', new Date('2014-1-2'));
               friend.update(function(err) {
+                assert.ok(!err, err);
+                cb();
+              });
+            },
+            function(err) {
+              assert.ok(!err, err);
+              //don't call cb here
+            });
+        }],
+
+        createItems: function(cb) {
+          var ids = _.range(1, 1 + itemCount);
+          helper.createItem2s(ids, function(err, res) {
+            assert.ok(!err, err);
+            items = res;
+            cb();
+          })
+        },
+
+        updateItems: ['createItems', function(cb) {
+
+          items.forEach(function(elem) {
+            elem.db.once('updated', function(err) {
+              assert.ok(!err, err);
+              itemUpdateCount++;
+              assert.ok(itemUpdateCount <= itemCount);
+              if (itemUpdateCount === itemCount) {
+                cb();
+              }
+            });
+          });
+
+          async.each(
+            items,
+            function(item, cb) {
+              item.p({
+                properties1: {
+                  test: true
+                },
+                properties2: [1, 2, 3],
+              });
+              item.update(function(err) {
+                assert.ok(!err, err);
+                cb();
+              });
+            },
+            function(err) {
+              assert.ok(!err, err);
+              //don't call cb here
+            });
+
+          async.each(
+            items,
+            function(item, cb) {
+              item.p({
+                properties1: {
+                  test: false
+                },
+                properties2: [1, 2, 3, 4],
+              });
+              item.update(function(err) {
                 assert.ok(!err, err);
                 cb();
               });
