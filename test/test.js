@@ -350,6 +350,19 @@ describe('User Model', function() {
         done();
       });
     });
+
+    it('should set primary key success', function() {
+      var user = new User();
+      var userId = 1;
+      user.p({
+        userId: userId
+      });
+      assert.equal(user.userId, userId);
+
+      user = new User();
+      user.userId = userId;
+      assert.equal(user.userId, userId);
+    });
   });
 });
 
