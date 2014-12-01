@@ -5,11 +5,11 @@
     "port": 3306,
     "user": "yqb",
     "password": "yqb",
+    "debug": ["ComQueryPacket"],
     "database": "model_test",
     "multipleStatements": true
   },
   "debug_1": {
-    "debug": ["ComQueryPacket"],
     "desc": "to be copy"
   },
   "debug_2": {

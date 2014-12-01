@@ -137,6 +137,7 @@ describe('User Model', function() {
 
       var count = 5;
       var users;
+      var userIds;
       async.series({
 
         createUsers: function(cb) {
@@ -148,7 +149,7 @@ describe('User Model', function() {
         },
 
         findUserByUserId: function(cb) {
-          var userIds = _(users).map(function(elem) {
+          userIds = _(users).map(function(elem) {
             return elem.p('userId');
           });
           User.load({
@@ -189,6 +190,219 @@ describe('User Model', function() {
             cb();
           });
         },
+
+        findByGT: function(cb) {
+          User.load({
+            userId: {
+              gt: userIds[0]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count - 1);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByGTE: function(cb) {
+          User.load({
+            userId: {
+              gte: userIds[0]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByLT: function(cb) {
+          User.load({
+            userId: {
+              lt: userIds[0]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 0);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByLTE: function(cb) {
+          User.load({
+            userId: {
+              lte: userIds[0]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 1);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByEqual: function(cb) {
+          User.load({
+            userId: {
+              equal: userIds[0]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 1);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByEquals: function(cb) {
+          User.load({
+            userId: {
+              equals: userIds[0]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 1);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByNotEqual: function(cb) {
+          User.load({
+            userId: {
+              notEqual: userIds[0]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 4);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByNotEquals: function(cb) {
+          User.load({
+            userId: {
+              notEquals: userIds[0]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 4);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByIn: function(cb) {
+          User.load({
+            userId: { in : [userIds[0], userIds[1]]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 2);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByNotIn: function(cb) {
+          User.load({
+            userId: {
+              notIn: [userIds[0], userIds[1]]
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count - 2);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByGTAndLTAndNotIn: function(cb) {
+          User.load({
+            userId: {
+              gt: userIds[0],
+              lt: userIds[4],
+              notIn: [userIds[3]],
+            },
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count - 3);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByOrder: function(cb) {
+          var beforeUserId = Number.MAX_VALUE;
+          User.load({
+            $order: {
+              userId: 'desc',
+              name: 'asc',
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, count);
+            res.forEach(function(elem) {
+              assert.ok(elem.userId < beforeUserId);
+              beforeUserId = elem.userId;
+              helper.checkModelIsLoaded(elem);
+            });
+
+            cb();
+          })
+        },
+
+        findByLimit: function(cb) {
+          User.load({
+            $limit: 3
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 3);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        },
+
+        findByLimitAndOffset: function(cb) {
+          User.load({
+            $limit: 3,
+            $offset: 3,
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res.length, 2);
+            res.forEach(function(elem) {
+              helper.checkModelIsLoaded(elem);
+            })
+            cb();
+          })
+        }
 
       }, function(err) {
         assert.ok(!err, err);
