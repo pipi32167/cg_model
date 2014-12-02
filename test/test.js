@@ -1407,6 +1407,65 @@ describe('DataMySqlLate', function() {
         done();
       })
     });
+
+    it('should count all users success', function(done) {
+
+      var count = 5;
+      var users;
+      async.series({
+
+        createUsers: function(cb) {
+          helper.createUsers(count, function(err, res) {
+            assert.ok(!err, err);
+            users = res;
+            cb();
+          });
+        },
+
+        countAll: function(cb) {
+          User.countAll(function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res, count);
+            cb();
+          })
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
+    it('should count users by arguments success', function(done) {
+
+      var count = 5;
+      var users;
+      async.series({
+
+        createUsers: function(cb) {
+          helper.createUsers(count, function(err, res) {
+            assert.ok(!err, err);
+            users = res;
+            cb();
+          });
+        },
+
+        countAll: function(cb) {
+          User.count({
+            userId: {
+              gt: users[0].userId,
+              lt: users[4].userId,
+            }
+          }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res, 3);
+            cb();
+          })
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
   });
 
   describe('Instance methods', function() {
