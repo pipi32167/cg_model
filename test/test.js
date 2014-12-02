@@ -577,6 +577,43 @@ describe('User Model', function() {
       user.userId = userId;
       assert.equal(user.userId, userId);
     });
+
+    it('should update user success', function(done) {
+
+      var userId, user;
+
+      async.series({
+        create: function(cb) {
+
+          user = new User();
+          user.create(function(err) {
+            assert.ok(!err, err);
+            userId = user.p('userId');
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        },
+
+        update: function(cb) {
+          user.p({
+            userId: user.userId,
+            name: 1,
+          });
+
+          assert.throws(function() {
+
+            user.update(function(err) {
+              assert.ok(!err, err);
+            });
+          });
+          cb();
+        },
+
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
   });
 });
 
@@ -1481,7 +1518,7 @@ describe('DataMySqlLate', function() {
           });
         },
 
-        remove: function (cb) {
+        remove: function(cb) {
           User.remove({
             userId: {
               gt: users[0].userId,
