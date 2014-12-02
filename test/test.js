@@ -1449,13 +1449,50 @@ describe('DataMySqlLate', function() {
           });
         },
 
-        countAll: function(cb) {
+        count: function(cb) {
           User.count({
             userId: {
               gt: users[0].userId,
               lt: users[4].userId,
             }
           }, function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res, 3);
+            cb();
+          })
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
+    it('should remove users by arguments success', function(done) {
+
+      var count = 5;
+      var users;
+      async.series({
+
+        createUsers: function(cb) {
+          helper.createUsers(count, function(err, res) {
+            assert.ok(!err, err);
+            users = res;
+            cb();
+          });
+        },
+
+        remove: function (cb) {
+          User.remove({
+            userId: {
+              gt: users[0].userId,
+              lt: users[4].userId,
+            },
+            $limit: 2,
+          }, cb);
+        },
+
+        check: function(cb) {
+          User.countAll(function(err, res) {
             assert.ok(!err, err);
             assert.equal(res, 3);
             cb();
