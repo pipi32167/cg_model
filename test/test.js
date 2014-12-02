@@ -2227,20 +2227,6 @@ describe('DataMySqlLate', function() {
             })
             .value();
 
-          // var updateCount = 0;
-          // items.forEach(function(item) {
-          //   item.db.once('updated', function(err) {
-          //     assert.ok(!err, err);
-          //     assert.ok(item.db.isSaved);
-          //     var id = item.id;
-          //     assert.ok(!!id);
-          //     ids.push(id);
-          //     updateCount++;
-          //     if (updateCount === count) {
-          //       cb();
-          //     }
-          //   });
-          // })
           async.each(
             items,
             function(item, cb) {
