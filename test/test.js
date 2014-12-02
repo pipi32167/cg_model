@@ -2212,10 +2212,11 @@ describe('DataMySqlLate', function() {
       var itemId = 100,
         ids = [];
       var idBegin = 1;
-      var count = 5;
+      var count = 100;
+      var items;
       async.series({
         create: function(cb) {
-          var items = _(idBegin)
+          items = _(idBegin)
             .chain()
             .range(idBegin + count)
             .map(function(id) {
@@ -2226,20 +2227,20 @@ describe('DataMySqlLate', function() {
             })
             .value();
 
-          var updateCount = 0;
-          items.forEach(function(item) {
-            item.db.once('updated', function(err) {
-              assert.ok(!err, err);
-              assert.ok(item.db.isSaved);
-              var id = item.id;
-              assert.ok(!!id);
-              ids.push(id);
-              updateCount++;
-              if (updateCount === count) {
-                cb();
-              }
-            });
-          })
+          // var updateCount = 0;
+          // items.forEach(function(item) {
+          //   item.db.once('updated', function(err) {
+          //     assert.ok(!err, err);
+          //     assert.ok(item.db.isSaved);
+          //     var id = item.id;
+          //     assert.ok(!!id);
+          //     ids.push(id);
+          //     updateCount++;
+          //     if (updateCount === count) {
+          //       cb();
+          //     }
+          //   });
+          // })
           async.each(
             items,
             function(item, cb) {
@@ -2252,7 +2253,30 @@ describe('DataMySqlLate', function() {
             },
             function(err) {
               assert.ok(!err, err);
+              cb();
             })
+        },
+
+        update: function(cb) {
+          var updateCount = 0;
+          items.forEach(function(elem) {
+            elem.db.once('updated', function(err) {
+              assert.ok(!err, err);
+              updateCount++;
+              if (updateCount === items.length) {
+                cb();
+              }
+            })
+          });
+          async.each(
+            items,
+            function(item, cb) {
+              item.desc = 'test';
+              item.update(cb);
+            },
+            function(err) {
+              assert.ok(!err, err);
+            });
         },
 
         checkInCache: function(cb) {
