@@ -8,7 +8,7 @@ var CGModel = require('../lib');
 require('./init');
 require('./models');
 
-CGModel.debug_mode = false;
+// CGModel.debug_mode = true;
 
 var User = CGModel.getModel('User');
 var User2 = CGModel.getModel('User2');
@@ -1193,11 +1193,14 @@ helper.createFriend2s = function(userId, friendIds, cb) {
         friendId: friendId,
         type: 0
       });
-      friend.create(function(err) {
+      friend.db.once('updated', function(err) {
         assert.ok(!err, err);
         helper.checkModelIsLoaded(friend);
         friends.push(friend);
         cb();
+      })
+      friend.create(function(err) {
+        assert.ok(!err, err);
       });
     },
     function(err) {
@@ -1216,11 +1219,14 @@ helper.createItem2s = function(ids, cb) {
         id: id,
         itemId: 100,
       });
-      item.create(function(err) {
+      item.db.once('updated', function(err) {
         assert.ok(!err, err);
         helper.checkModelIsLoaded(item);
         items.push(item);
         cb();
+      })
+      item.create(function(err) {
+        assert.ok(!err, err);
       });
     },
     function(err) {
@@ -1248,7 +1254,7 @@ describe('DataMySqlLate', function() {
       },
 
       clearItem: function(cb) {
-        Item.removeAll(function(err) {
+        Item2.removeAll(function(err) {
           assert.ok(!err, err);
           cb();
         });
@@ -1580,7 +1586,7 @@ describe('DataMySqlLate', function() {
 
             user.p('registerTime', registerTime);
             user.db.once('updated', function() {
-              done();
+              cb();
             });
             user.update(function(err) {
               assert.ok(!err, err);
@@ -1596,7 +1602,7 @@ describe('DataMySqlLate', function() {
             assert.ok(!err, err);
             helper.checkModelIsLoaded(user);
 
-            assert.equal(user.registerTime, registerTime);
+            assert.deepEqual(user.registerTime, registerTime);
             cb();
           });
         }
@@ -1712,7 +1718,6 @@ describe('DataMySqlLate', function() {
             cb();
           });
         },
-
 
         updateUsers: ['createUsers', function(cb) {
 
@@ -1855,6 +1860,312 @@ describe('DataMySqlLate', function() {
               //don't call cb here
             });
         }],
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should run a create job immediately success', function(done) {
+
+      var itemId = 100,
+        id;
+      var item = new Item2();
+      item.itemId = itemId;
+      async.series({
+        create: function(cb) {
+          item.db.once('updated', function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.db.isSaved);
+            id = item.id;
+            assert.ok(!!id);
+            cb();
+          });
+          item.create(function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.db.isSaved);
+          });
+        },
+
+        checkInCache: function(cb) {
+          var item = new Item2();
+          item.id = id;
+          item.cache.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.cache.isSaved);
+            cb();
+          });
+        },
+
+        removeFromCache: function(cb) {
+          var item = new Item2();
+          item.id = id;
+          item.cache.remove(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        checkInDB: function(cb) {
+          var item = new Item2();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            cb();
+          });
+        }
+
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should run a create job later success', function(done) {
+
+      var itemId = 100,
+        id = 1;
+      var item = new Item2();
+      item.itemId = itemId;
+      item.id = id;
+      async.series({
+        create: function(cb) {
+          item.db.once('updated', function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.db.isSaved);
+            assert.ok(!!id);
+            cb();
+          });
+          item.create(function(err) {
+            assert.ok(!err, err);
+            assert.ok(!item.db.isSaved);
+          });
+        },
+
+        checkInCache: function(cb) {
+          var item = new Item2();
+          item.id = id;
+          item.cache.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.cache.isSaved);
+            cb();
+          });
+        },
+
+        removeFromCache: function(cb) {
+          var item = new Item2();
+          item.id = id;
+          item.cache.remove(function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        checkInDB: function(cb) {
+          var item = new Item2();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(item);
+            cb();
+          });
+        }
+
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should run many create jobs immediately success', function(done) {
+
+      var itemId = 100,
+        ids = [];
+      var count = 5;
+      async.series({
+        create: function(cb) {
+          var items = _(0)
+            .chain()
+            .range(count)
+            .map(function() {
+              var item = new Item2();
+              item.itemId = itemId;
+              return item;
+            })
+            .value();
+
+          var updateCount = 0;
+          items.forEach(function(item) {
+            item.db.once('updated', function(err) {
+              assert.ok(!err, err);
+              assert.ok(item.db.isSaved);
+              var id = item.id;
+              assert.ok(!!id);
+              ids.push(id);
+              updateCount++;
+              if (updateCount === count) {
+                cb();
+              }
+            });
+          })
+          async.each(
+            items,
+            function(item, cb) {
+
+              item.create(function(err) {
+                assert.ok(!err, err);
+                assert.ok(item.db.isSaved);
+                cb();
+              })
+            },
+            function(err) {
+              assert.ok(!err, err);
+            })
+        },
+
+        checkInCache: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item2();
+              item.id = id;
+              item.cache.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(item.cache.isSaved);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        removeFromCache: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item2();
+              item.id = id;
+              item.cache.remove(function(err) {
+                assert.ok(!err, err);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        checkInDB: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item2();
+              item.id = id;
+              item.load(function(err) {
+                assert.ok(!err, err);
+                helper.checkModelIsLoaded(item);
+                cb();
+              });
+            },
+            cb);
+        }
+
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should run many create jobs later success', function(done) {
+
+      var itemId = 100,
+        ids = [];
+      var idBegin = 1;
+      var count = 5;
+      async.series({
+        create: function(cb) {
+          var items = _(idBegin)
+            .chain()
+            .range(idBegin + count)
+            .map(function(id) {
+              var item = new Item2();
+              item.itemId = itemId;
+              item.id = id;
+              return item;
+            })
+            .value();
+
+          var updateCount = 0;
+          items.forEach(function(item) {
+            item.db.once('updated', function(err) {
+              assert.ok(!err, err);
+              assert.ok(item.db.isSaved);
+              var id = item.id;
+              assert.ok(!!id);
+              ids.push(id);
+              updateCount++;
+              if (updateCount === count) {
+                cb();
+              }
+            });
+          })
+          async.each(
+            items,
+            function(item, cb) {
+
+              item.create(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!item.db.isSaved);
+                cb();
+              })
+            },
+            function(err) {
+              assert.ok(!err, err);
+            })
+        },
+
+        checkInCache: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item2();
+              item.id = id;
+              item.cache.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(item.cache.isSaved);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        removeFromCache: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item2();
+              item.id = id;
+              item.cache.remove(function(err) {
+                assert.ok(!err, err);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        checkInDB: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item2();
+              item.id = id;
+              item.load(function(err) {
+                assert.ok(!err, err);
+                helper.checkModelIsLoaded(item);
+                cb();
+              });
+            },
+            cb);
+        }
+
       }, function(err) {
         assert.ok(!err, err);
         done();
