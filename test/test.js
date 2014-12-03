@@ -16,6 +16,8 @@ var Friend = CGModel.getModel('Friend');
 var Friend2 = CGModel.getModel('Friend2');
 var Item = CGModel.getModel('Item');
 var Item2 = CGModel.getModel('Item2');
+var Item3 = CGModel.getModel('Item3');
+var Item4 = CGModel.getModel('Item4');
 
 var helper = {};
 helper.createUsers = function(count, cb) {
@@ -2306,6 +2308,294 @@ describe('DataMySqlLate', function() {
             cb);
         }
 
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+  });
+});
+
+describe('DataCache', function() {
+  beforeEach(function(done) {
+    Item3.cache.conn.flushall(done);
+  })
+  describe('Instance methods', function() {
+    it('should create an item success', function(done) {
+
+      var item = new Item3();
+      var id = 1;
+      var itemId = 100;
+      item.p({
+        id: id,
+        itemId: itemId,
+      });
+      async.series({
+        create: function(cb) {
+          item.create(function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.cache.isSaved);
+            assert.ok(item.mem.isLoaded);
+            cb();
+          });
+        },
+
+        load: function(cb) {
+          var item = new Item3();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.cache.isSaved);
+            assert.ok(item.mem.isLoaded);
+            assert.equal(item.itemId, itemId);
+            cb();
+          })
+        },
+
+        remove: function(cb) {
+          var item = new Item3();
+          item.id = id;
+          item.remove(function(err) {
+            assert.ok(!err, err);
+            assert.ok(!item.cache.isSaved);
+            assert.ok(!item.mem.isLoaded);
+            cb();
+          })
+        },
+
+        check: function(cb) {
+          var item = new Item3();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(!item.cache.isSaved);
+            assert.ok(!item.mem.isLoaded);
+            cb();
+          })
+        },
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should create many items success', function(done) {
+      var ids = _.range(1, 10);
+      var itemId = 100;
+      async.series({
+        create: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item3();
+              item.id = id;
+              item.itemId = itemId;
+              item.create(function(err) {
+                assert.ok(!err, err);
+                assert.ok(item.cache.isSaved);
+                assert.ok(item.mem.isLoaded);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        load: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item3();
+              item.id = id;
+              item.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(item.cache.isSaved);
+                assert.ok(item.mem.isLoaded);
+                assert.equal(item.itemId, itemId);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        remove: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item3();
+              item.id = id;
+              item.remove(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!item.cache.isSaved);
+                assert.ok(!item.mem.isLoaded);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        check: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item3();
+              item.id = id;
+              item.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!item.cache.isSaved);
+                assert.ok(!item.mem.isLoaded);
+                cb();
+              });
+            },
+            cb);
+        },
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+  });
+});
+
+describe('DataMySql', function() {
+  beforeEach(function(done) {
+    Item4.removeAll(done);
+  })
+  describe('Instance methods', function() {
+    it('should create an item success', function(done) {
+
+      var item = new Item4();
+      var id = 1;
+      var itemId = 100;
+      item.p({
+        id: id,
+        itemId: itemId,
+      });
+      async.series({
+        create: function(cb) {
+          item.db.once('updated', function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.db.isSaved);
+            assert.ok(item.mem.isLoaded);
+            cb();
+          })
+          item.create(function(err) {
+            assert.ok(!err, err);
+          });
+        },
+
+        load: function(cb) {
+          var item = new Item4();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(item.db.isSaved);
+            assert.ok(item.mem.isLoaded);
+            assert.equal(item.itemId, itemId);
+            cb();
+          })
+        },
+
+        remove: function(cb) {
+          var item = new Item4();
+          item.id = id;
+          item.remove(function(err) {
+            assert.ok(!err, err);
+            assert.ok(!item.db.isSaved);
+            assert.ok(!item.mem.isLoaded);
+            cb();
+          })
+        },
+
+        check: function(cb) {
+          var item = new Item4();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(!item.db.isSaved);
+            assert.ok(!item.mem.isLoaded);
+            cb();
+          })
+        },
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should create many items success', function(done) {
+      var count = 10;
+      var ids = [];
+      var itemId = 100;
+      async.series({
+        create: function(cb) {
+          async.timesSeries(
+            count,
+            function(id, cb) {
+              var item = new Item4();
+              item.itemId = itemId;
+
+              item.db.once('updated', function(err) {
+                assert.ok(!err, err);
+                assert.ok(item.db.isSaved);
+                assert.ok(item.mem.isLoaded);
+                ids.push(item.id);
+                cb();
+              })
+              item.create(function(err) {
+                assert.ok(!err, err);
+              });
+            },
+            cb);
+        },
+
+        load: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item4();
+              item.id = id;
+              item.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(item.db.isSaved);
+                assert.ok(item.mem.isLoaded);
+                assert.equal(item.itemId, itemId);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        remove: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item4();
+              item.id = id;
+              item.remove(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!item.db.isSaved);
+                assert.ok(!item.mem.isLoaded);
+                cb();
+              });
+            },
+            cb);
+        },
+
+        check: function(cb) {
+          async.eachSeries(
+            ids,
+            function(id, cb) {
+              var item = new Item4();
+              item.id = id;
+              item.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!item.db.isSaved);
+                assert.ok(!item.mem.isLoaded);
+                cb();
+              });
+            },
+            cb);
+        },
       }, function(err) {
         assert.ok(!err, err);
         done();
