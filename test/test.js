@@ -65,8 +65,7 @@ beforeEach(function(done) {
 })
 
 afterEach(function(done) {
-  CGModel.stopCronJob('mysql_late');
-  done();
+  CGModel.stopCronJob('mysql_late', done);
 })
 
 
