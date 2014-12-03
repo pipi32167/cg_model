@@ -2603,3 +2603,9 @@ describe('DataMySql', function() {
     });
   });
 });
+
+describe('CGModel', function() {
+  it('should restart cron job success', function(done) {
+    CGModel.restartCronJob('mysql_late', done);
+  });
+});
