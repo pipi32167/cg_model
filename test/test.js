@@ -59,6 +59,16 @@ helper.checkModelIsUnloaded = function(obj) {
   assert.ok(!obj.cache.isSaved);
 }
 
+beforeEach(function(done) {
+  CGModel.startCronJob('mysql_late');
+  done();
+})
+
+afterEach(function(done) {
+  CGModel.stopCronJob('mysql_late');
+  done();
+})
+
 
 describe('User Model', function() {
   beforeEach(function(done) {
@@ -1301,18 +1311,6 @@ describe('DataMySqlLate', function() {
       assert.ok(!err, err);
       done();
     })
-  });
-
-  before(function(done) {
-
-    CGModel.startCronJob('mysql_late');
-    done();
-  });
-
-  after(function(done) {
-
-    CGModel.stopCronJob('mysql_late');
-    done();
   });
 
   describe('Static methods', function() {
