@@ -8,7 +8,7 @@ var CGModel = require('../lib');
 require('./init');
 require('./models');
 
-CGModel.debug_mode = true;
+// CGModel.debug_mode = true;
 
 // CGModel.setLogger({
 //   info: console.log.bind(console),
@@ -1585,6 +1585,103 @@ describe('DataMySqlLate', function() {
         done();
       });
     });
+
+    it('should create and update a new friend async success', function(done) {
+
+      var userId = 1,
+        friendId = 2;
+      var friend;
+      async.series({
+        create: function(cb) {
+
+          friend = new Friend2();
+          friend.userId = userId;
+          friend.friendId = friendId;
+          friend.type = 0;
+
+          friend.db.once('updated', function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(friend);
+            cb();
+          })
+          friend.create(function(err) {
+            assert.ok(!err, err);
+          });
+        },
+
+        update: function(cb) {
+
+          friend.type = 1;
+          friend.db.once('updated', function (err) {
+            assert.ok(!err, err);
+            cb();
+          });
+          friend.update(function (err) {
+            assert.ok(!err, err);
+          });
+        },
+
+        check: function (cb) {
+          var friend2 = new Friend2();
+          friend2.userId = userId;
+          friend2.friendId = friendId;
+          friend2.db.load(function (err) {
+            assert.ok(!err, err);
+            assert.equal(friend2.db.p('type'), friend.type);
+            cb();
+          })
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
+    it('should create and update a new friend sync success', function(done) {
+
+      var userId = 1,
+        friendId = 2;
+      var friend;
+      async.series({
+        create: function(cb) {
+
+          friend = new Friend2();
+          friend.userId = userId;
+          friend.friendId = friendId;
+          friend.type = 0;
+
+          friend.createSync(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(friend);
+            cb();
+          });
+        },
+
+        update: function(cb) {
+
+          friend.type = 1;
+          friend.updateSync(function (err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        check: function (cb) {
+          var friend2 = new Friend2();
+          friend2.userId = userId;
+          friend2.friendId = friendId;
+          friend2.db.load(function (err) {
+            assert.ok(!err, err);
+            assert.equal(friend2.db.p('type'), friend.type);
+            cb();
+          })
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
 
     it('should access by property of object success', function(done) {
 
