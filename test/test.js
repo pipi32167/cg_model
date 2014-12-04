@@ -8,7 +8,14 @@ var CGModel = require('../lib');
 require('./init');
 require('./models');
 
-// CGModel.debug_mode = true;
+CGModel.debug_mode = true;
+
+// CGModel.setLogger({
+//   info: console.log.bind(console),
+//   warn: console.warn.bind(console),
+//   error: console.error.bind(console),
+//   debug: console.log.bind(console),
+// });
 
 var User = CGModel.getModel('User');
 var User2 = CGModel.getModel('User2');
@@ -1286,6 +1293,7 @@ helper.createItem2s = function(ids, cb) {
 describe('DataMySqlLate', function() {
 
   beforeEach(function(done) {
+
     async.parallel({
       clearUser: function(cb) {
         User2.removeAll(function(err) {
