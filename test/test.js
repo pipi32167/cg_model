@@ -1612,20 +1612,20 @@ describe('DataMySqlLate', function() {
         update: function(cb) {
 
           friend.type = 1;
-          friend.db.once('updated', function (err) {
+          friend.db.once('updated', function(err) {
             assert.ok(!err, err);
             cb();
           });
-          friend.update(function (err) {
+          friend.update(function(err) {
             assert.ok(!err, err);
           });
         },
 
-        check: function (cb) {
+        check: function(cb) {
           var friend2 = new Friend2();
           friend2.userId = userId;
           friend2.friendId = friendId;
-          friend2.db.load(function (err) {
+          friend2.db.load(function(err) {
             assert.ok(!err, err);
             assert.equal(friend2.db.p('type'), friend.type);
             cb();
@@ -1660,17 +1660,17 @@ describe('DataMySqlLate', function() {
         update: function(cb) {
 
           friend.type = 1;
-          friend.updateSync(function (err) {
+          friend.updateSync(function(err) {
             assert.ok(!err, err);
             cb();
           });
         },
 
-        check: function (cb) {
+        check: function(cb) {
           var friend2 = new Friend2();
           friend2.userId = userId;
           friend2.friendId = friendId;
-          friend2.db.load(function (err) {
+          friend2.db.load(function(err) {
             assert.ok(!err, err);
             assert.equal(friend2.db.p('type'), friend.type);
             cb();
@@ -2457,6 +2457,35 @@ describe('DataCache', function() {
           })
         },
 
+        update: function(cb) {
+          item.itemId = 101;
+          item.isLock = true;
+          item.desc = 'testtesttest';
+          item.updateTime = new Date();
+          item.properties1.test = 1;
+          item.properties2.push(1);
+          item.update(cb);
+        },
+
+        checkUpdate: function(cb) {
+
+          var item2 = new Item3();
+          item2.id = id;
+          item2.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(item2.cache.isSaved);
+            assert.ok(item2.mem.isLoaded);
+            assert.deepEqual(item.itemId, item2.itemId);
+            assert.deepEqual(item.isLock, item2.isLock);
+            assert.deepEqual(item.desc, item2.desc);
+            assert.deepEqual(item.updateTime, item2.updateTime);
+            assert.deepEqual(item.properties1, item2.properties1);
+            assert.deepEqual(item.properties2, item2.properties2);
+
+            cb();
+          });
+        },
+
         remove: function(cb) {
           var item = new Item3();
           item.id = id;
@@ -2482,6 +2511,26 @@ describe('DataCache', function() {
         assert.ok(!err, err);
         done();
       })
+    });
+
+    it('should update an item success', function(done) {
+
+      var item = new Item3();
+      var id = 1;
+      var itemId = 100;
+      item.p({
+        id: id,
+        itemId: itemId,
+      });
+      item.create(function(err) {
+        assert.ok(!err, err);
+        assert.ok(item.cache.isSaved);
+        assert.ok(item.mem.isLoaded);
+        item.update(function (err) {
+          assert.ok(!err, err);
+          done();
+        });
+      });
     });
 
     it('should create many items success', function(done) {
