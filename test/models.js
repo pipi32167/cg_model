@@ -229,3 +229,28 @@ CGModel.createModel({
     type: 'none',
   },
 });
+
+CGModel.createModel({
+
+  name: 'Item5',
+
+  props: {
+    id:               { type: 'number'  },
+    itemId:           { type: 'number'  },
+    isLock:           { type: 'bool'  },
+    desc:             { type: 'string'  },
+    updateTime:       { type: 'date'  },
+    properties1:      { type: 'object'  },
+    properties2:      { type: 'array'  },
+  },
+
+  db: {
+    type: 'none',
+  },
+
+  cache: {
+    type: 'none',
+  },
+});
+
+

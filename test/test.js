@@ -25,6 +25,7 @@ var Item = CGModel.getModel('Item');
 var Item2 = CGModel.getModel('Item2');
 var Item3 = CGModel.getModel('Item3');
 var Item4 = CGModel.getModel('Item4');
+var Item5 = CGModel.getModel('Item5');
 
 var helper = {};
 helper.createUsers = function(count, cb) {
@@ -2525,7 +2526,7 @@ describe('DataCache', function() {
         assert.ok(!err, err);
         assert.ok(item.cache.isSaved);
         assert.ok(item.mem.isLoaded);
-        item.update(function (err) {
+        item.update(function(err) {
           assert.ok(!err, err);
           done();
         });
@@ -2760,5 +2761,84 @@ describe('DataMySql', function() {
 describe('CGModel', function() {
   it('should restart cron job success', function(done) {
     CGModel.restartCronJob('mysql_late', done);
+  });
+});
+
+describe('DataMem', function() {
+  it('should check properties success', function() {
+
+    var item = {};
+    assert.throws(function() {
+      Item5.checkProps(item);
+    });
+
+    item = {
+      id: '1'
+    };
+    assert.throws(function() {
+      Item5.checkProps(item);
+    });
+
+    item = {
+      id: 1,
+      itemId: 1,
+      isLock: true,
+      desc: '',
+      updateTime: new Date(),
+      properties1: {},
+      properties2: [],
+    };
+    Item5.checkProps(item);
+
+    item = {
+      id: 1,
+      itemId: 1,
+      isLock: true,
+      desc: '',
+      updateTime: new Date().toString(),
+      properties1: {},
+      properties2: [],
+    };
+    assert.throws(function() {
+      Item5.checkProps(item);
+    });
+
+    item = {
+      id: 1,
+      itemId: 1,
+      isLock: true,
+      desc: '',
+      updateTime: new Date(),
+      properties1: [],
+      properties2: [],
+    };
+    assert.throws(function() {
+      Item5.checkProps(item);
+    });
+
+    item = {
+      id: 1,
+      itemId: 1,
+      isLock: true,
+      desc: '',
+      updateTime: new Date(),
+      properties1: [],
+      properties2: {},
+    };
+    assert.throws(function() {
+      Item5.checkProps(item);
+    });
+    
+    item = {
+      id: 1,
+      itemId: 1,
+      isLock: false,
+      desc: '',
+      updateTime: new Date(),
+      properties1: {},
+      properties2: [],
+    };
+    Item5.checkProps(item);
+
   });
 });
