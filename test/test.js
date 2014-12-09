@@ -1775,7 +1775,6 @@ describe('DataMySqlLate', function() {
         },
 
         update: function(cb) {
-          user = new User2();
           user.p({
             userId: userId,
             name: '0' + name,
