@@ -254,3 +254,55 @@ CGModel.createModel({
 });
 
 
+CGModel.createModel({
+
+  name: 'Item5Wrapper',
+
+  props: {
+    item:             { type: 'model', modelName: 'Item5' },
+  },
+
+  db: {
+    type: 'none',
+  },
+
+  cache: {
+    type: 'none',
+  },
+});
+
+
+CGModel.createModel({
+
+  name: 'Item5Array',
+
+  props: {
+    items:            { type: 'model_array', modelName: 'Item5' },
+  },
+
+  db: {
+    type: 'none',
+  },
+
+  cache: {
+    type: 'none',
+  },
+});
+
+
+CGModel.createModel({
+
+  name: 'Item5Dict',
+
+  props: {
+    items:            { type: 'model_dict', modelName: 'Item5' },
+  },
+
+  db: {
+    type: 'none',
+  },
+
+  cache: {
+    type: 'none',
+  },
+});
