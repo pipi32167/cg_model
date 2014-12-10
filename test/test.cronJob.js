@@ -16,9 +16,44 @@ CGModel.setCacheClient(dbName, redisClient);
 
 CGModel.initialize({
   'mysql_late': {
-    'cron': '*/10 * * * * *',
+    'cron': '* */10 * * * *',
     'batchCount': 10
   }
+});
+
+CGModel.createModel({
+
+  name: 'Item',
+
+  props: {
+    id:               { type: 'number', primary: true, defaultValue: 100 },
+    itemId:           { type: 'number', defaultValue: 100, },
+    isLock:           { type: 'bool', defaultValue: false },
+    desc:             { type: 'string', defaultValue: '' },
+    updateTime:       { type: 'date', defaultValue: new Date('2014-1-1'), },
+    properties1:      { type: 'object', defaultValue: {}, },
+    properties2:      { type: 'array', defaultValue: [], },
+  },
+
+  db: {
+    type: 'mysql_late',
+    db_name: 'model_test',
+    tbl_name: 'item',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'model_test',
+    name: 'item',
+    prefix: 'test',
+  },
+});
+
+var Item = CGModel.getModel('Item');
+
+var item = new Item();
+item.create(function (err) {
+  assert.ok(!err, err);
 });
 
 CGModel.debug_mode = true;
@@ -30,4 +65,4 @@ setTimeout(function() {
     assert.ok(!err, err);
     console.log('end');
   });
-}, 1000);
+}, 5000);
