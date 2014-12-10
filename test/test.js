@@ -428,6 +428,112 @@ describe('User Model', function() {
         done();
       });
     });
+
+    it('should update many users success', function(done) {
+
+      var count = 5;
+      var users;
+      var userIds;
+      async.series({
+
+        createUsers: function(cb) {
+          helper.createUsers(count, function(err, res) {
+            assert.ok(!err, err);
+            users = res;
+            userIds = _(users).map(function(elem) {
+              return elem.userId;
+            })
+            cb();
+          });
+        },
+
+        updateUser: function(cb) {
+
+          User.update({
+            $update: {
+              money: 9999,
+            },
+            $where: {
+              userId: users[0].userId
+            }
+          }, function(err) {
+            assert.ok(!err, err);
+            cb();
+          })
+        },
+
+        checkInCache: function(cb) {
+          User.load({
+            userId: users[0].userId
+          }, function(err, users) {
+            assert.ok(!err, err);
+            assert.equal(users[0].money, 9999);
+            cb();
+          });
+        },
+
+        removeFromCache: function(cb) {
+          users[0].cache.remove(function(err) {
+            assert.ok(!err, err);
+            cb();
+          })
+        },
+
+        checkInDB: function(cb) {
+          User.load({
+            userId: users[0].userId
+          }, function(err, users) {
+            assert.ok(!err, err);
+            assert.equal(users[0].money, 9999);
+            cb();
+          });
+        },
+
+        updateUsers: function(cb) {
+
+          User.update({
+            $update: {
+              money: 9999,
+            },
+          }, function(err) {
+            assert.ok(!err, err);
+            cb();
+          })
+        },
+
+        checkInCache2: function(cb) {
+          User.load({
+            userId: userIds
+          }, function(err, users) {
+            assert.ok(!err, err);
+            users.forEach(function (elem) {
+              assert.equal(elem.money, 9999);
+            });
+            cb();
+          });
+        },
+
+        // removeFromCache2: function(cb) {
+        //   users[0].cache.remove(function(err) {
+        //     assert.ok(!err, err);
+        //     cb();
+        //   })
+        // },
+
+        // checkInDB2: function(cb) {
+        //   User.load({
+        //     userId: users[0].userId
+        //   }, function(err, users) {
+        //     assert.ok(!err, err);
+        //     assert.equal(users[0].money, 9999);
+        //     cb();
+        //   });
+        // }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
   });
 
   describe('instance methods', function() {
