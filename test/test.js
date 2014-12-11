@@ -70,6 +70,7 @@ helper.checkModelIsUnloaded = function(obj) {
 }
 
 beforeEach(function(done) {
+  CGModel.initialize(require('./config/cg_model'));
   CGModel.startCronJob('mysql_late');
   done();
 })
@@ -506,7 +507,7 @@ describe('User Model', function() {
             userId: userIds
           }, function(err, users) {
             assert.ok(!err, err);
-            users.forEach(function (elem) {
+            users.forEach(function(elem) {
               assert.equal(elem.money, 9999);
             });
             cb();
@@ -2518,6 +2519,55 @@ describe('DataMySqlLate', function() {
             },
             cb);
         }
+
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should create and remove a obj success', function(done) {
+      var id = 1;
+      var Item = CGModel.getModel('Item2NoAutoIncr');
+      async.series({
+        restartCronJob1: function(cb) {
+          CGModel.initialize({
+            'mysql_late': {
+              'cron': '*/15 * * * * *',
+              'batchCount': 3
+            }
+          });
+          CGModel.restartCronJob('mysql_late', cb);
+        },
+
+        create: function(cb) {
+          var item = new Item();
+          item.id = id;
+          item.itemId = 100;
+          item.create(function(err) {
+            assert.ok(!err, err);
+
+            item.remove(function(err) {
+              assert.ok(!err, err);
+              cb();
+            });
+          });
+        },
+
+        restartCronJob2: function(cb) {
+          CGModel.initialize(require('./config/cg_model'));
+          CGModel.restartCronJob('mysql_late', cb);
+        },
+
+        check: function(cb) {
+          var item = new Item();
+          item.id = id;
+          item.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(!item.mem.isLoaded);
+            cb();
+          });
+        },
 
       }, function(err) {
         assert.ok(!err, err);
