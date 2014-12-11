@@ -1623,12 +1623,16 @@ describe('DataMySqlLate', function() {
 
       var count = 5;
       var users;
+      var userIds;
       async.series({
 
         createUsers: function(cb) {
           helper.createUsers(count, function(err, res) {
             assert.ok(!err, err);
             users = res;
+            userIds = _(users).map(function(elem) {
+              return elem.userId;
+            });
             cb();
           });
         },
@@ -1649,6 +1653,127 @@ describe('DataMySqlLate', function() {
             assert.equal(res, 3);
             cb();
           })
+        },
+
+        check2: function(cb) {
+
+          var removeUserIds = userIds.slice(1, 3);
+          // console.log(removeUserIds);
+          async.eachSeries(
+            removeUserIds,
+            function(elem, cb) {
+              var user = new User();
+              user.userId = elem;
+              user.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!user.mem.isLoaded);
+                cb();
+              })
+            }, cb);
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
+    it('should remove friends success when specified userId', function(done) {
+      
+      var userId1 = 1;
+      var friendIds1 = [2,3,4,5];
+      async.series({
+
+        createFriends1: function(cb) {
+          helper.createFriends(userId1, friendIds1, function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        remove: function(cb) {
+          Friend.remove({
+            userId: userId1,
+          }, cb);
+        },
+
+        check: function(cb) {
+          Friend.countAll(function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res, 0);
+            cb();
+          })
+        },
+
+        check2: function(cb) {
+
+          async.eachSeries(
+            friendIds1,
+            function(elem, cb) {
+              var friend = new Friend();
+              friend.userId = userId1;
+              friend.friendId = elem;
+              friend.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!friend.mem.isLoaded);
+                cb();
+              })
+            }, cb);
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
+    });
+
+    it('should remove friends success when specified friendId', function(done) {
+        
+      var friendId = 5;
+      var userId1 = 1;
+      var userId2 = 2;
+      async.series({
+
+        createFriends1: function(cb) {
+          helper.createFriends(userId1, [friendId], function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        createFriends2: function(cb) {
+          helper.createFriends(userId2, [friendId], function(err) {
+            assert.ok(!err, err);
+            cb();
+          });
+        },
+
+        remove: function(cb) {
+          Friend.remove({
+            friendId: friendId,
+          }, cb);
+        },
+
+        check: function(cb) {
+          Friend.countAll(function(err, res) {
+            assert.ok(!err, err);
+            assert.equal(res, 0);
+            cb();
+          })
+        },
+
+        check2: function(cb) {
+
+          async.eachSeries(
+            [userId1, userId2],
+            function(elem, cb) {
+              var friend = new Friend();
+              friend.userId = elem;
+              friend.friendId = friendId;
+              friend.load(function(err) {
+                assert.ok(!err, err);
+                assert.ok(!friend.mem.isLoaded);
+                cb();
+              })
+            }, cb);
         }
       }, function(err) {
         assert.ok(!err, err);
