@@ -18,7 +18,9 @@ CGModel.initialize({
     cron: '* */10 * * * *',
     batchCount: 10
   },
-  // debug_mode: true,
+  debug_mode: {
+    sql: true
+  },
 });
 
 CGModel.createModel({
