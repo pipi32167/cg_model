@@ -2,5 +2,6 @@
   "mysql_late": {
     "cron": "* * * * * *",
     "batchCount": 3
-  }
+  },
+  "debug_mode": true
 }

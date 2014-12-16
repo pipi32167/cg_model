@@ -4,7 +4,6 @@ var mysql = require('mysql');
 var redis = require('redis');
 var CGModel = require('../lib');
 
-// CGModel.debug_mode = true;
 var dbName = 'model_test';
 var mysqlConfig = require('./config/mysql')[dbName];
 var pool = mysql.createPool(mysqlConfig);
@@ -15,10 +14,11 @@ var redisClient = redis.createClient(redisConfig.port, redisConfig.host);
 CGModel.setCacheClient(dbName, redisClient);
 
 CGModel.initialize({
-  'mysql_late': {
-    'cron': '* */10 * * * *',
-    'batchCount': 10
-  }
+  mysql_late: {
+    cron: '* */10 * * * *',
+    batchCount: 10
+  },
+  // debug_mode: true,
 });
 
 CGModel.createModel({
@@ -56,7 +56,7 @@ item.create(function (err) {
   assert.ok(!err, err);
 });
 
-CGModel.debug_mode = true;
+// CGModel.debug_mode = true;
 CGModel.start();
 
 setTimeout(function() {
