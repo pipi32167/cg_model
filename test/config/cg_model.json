@@ -3,5 +3,8 @@
     "cron": "* * * * * *",
     "batchCount": 3
   },
-  "debug_mode": true
+  "debug_mode": {
+    "info": false,
+    "sql": true
+  }
 }
