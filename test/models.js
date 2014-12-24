@@ -334,3 +334,25 @@ CGModel.createModel({
     type: 'none',
   },
 });
+
+CGModel.createModel({
+
+  name: 'Record',
+
+  props: {
+    recordTime:       { type: 'date', primary: true },
+  },
+
+  db: {
+    type: 'mysql',
+    db_name: 'model_test',
+    tbl_name: 'record',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'model_test',
+    name: 'record',
+    prefix: 'test',
+  },
+});

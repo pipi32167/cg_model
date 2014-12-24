@@ -26,6 +26,7 @@ var Item2 = CGModel.getModel('Item2');
 var Item3 = CGModel.getModel('Item3');
 var Item4 = CGModel.getModel('Item4');
 var Item5 = CGModel.getModel('Item5');
+var Record = CGModel.getModel('Record');
 
 var helper = {};
 helper.createUsers = function(count, cb) {
@@ -1678,9 +1679,9 @@ describe('DataMySqlLate', function() {
     });
 
     it('should remove friends success when specified userId', function(done) {
-      
+
       var userId1 = 1;
-      var friendIds1 = [2,3,4,5];
+      var friendIds1 = [2, 3, 4, 5];
       async.series({
 
         createFriends1: function(cb) {
@@ -1726,7 +1727,7 @@ describe('DataMySqlLate', function() {
     });
 
     it('should remove friends success when specified friendId', function(done) {
-        
+
       var friendId = 5;
       var userId1 = 1;
       var userId2 = 2;
@@ -2893,7 +2894,15 @@ describe('DataCache', function() {
 
 describe('DataMySql', function() {
   beforeEach(function(done) {
-    Item4.removeAll(done);
+    async.parallel([
+
+      Item4.removeAll.bind(Item4),
+
+      Record.removeAll.bind(Record),
+    ], function(err) {
+      assert.ok(!err, err);
+      done();
+    })
   })
   describe('Instance methods', function() {
     it('should create an item success', function(done) {
@@ -3032,6 +3041,35 @@ describe('DataMySql', function() {
             cb);
         },
       }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+
+    it('should create a record success', function(done) {
+      var recordTime = new Date();
+
+      async.series({
+        create: function(cb) {
+          var record = new Record();
+          record.recordTime = recordTime;
+          record.create(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(record);
+            cb();
+          });
+        },
+
+        check: function(cb) {
+          var record = new Record();
+          record.recordTime = recordTime;
+          record.load(function(err) {
+            assert.ok(!err, err);
+            helper.checkModelIsLoaded(record);
+            cb();
+          });
+        },
+      }, function (err) {
         assert.ok(!err, err);
         done();
       })
