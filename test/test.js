@@ -5,6 +5,8 @@ var _ = require('underscore');
 var assert = require('assert');
 var async = require('async');
 var CGModel = require('../lib');
+var utils = require('../lib/utils');
+var consts = require('../lib/consts');
 require('./init');
 require('./models');
 
@@ -27,6 +29,18 @@ var Item3 = CGModel.getModel('Item3');
 var Item4 = CGModel.getModel('Item4');
 var Item5 = CGModel.getModel('Item5');
 var Record = CGModel.getModel('Record');
+
+var beforeDeepEqual = assert.deepEqual;
+assert.deepEqual = function (v1, v2, m) {
+  var type1 = utils.typeOf(v1);
+  var type2 = utils.typeOf(v2);
+  if (type1 === 'date' && 
+    type2 === 'date') {
+    beforeDeepEqual(v1.valueOf() - v1.getMilliseconds(), v2.valueOf() - v2.getMilliseconds(), m);
+  } else {
+    beforeDeepEqual(v1, v2, m);
+  }
+}
 
 var helper = {};
 helper.createUsers = function(count, cb) {
@@ -1214,7 +1228,7 @@ describe('Item Model', function() {
             assert.deepEqual(item.itemId, itemInfo.itemId);
             assert.deepEqual(item.isLock, itemInfo.isLock);
             assert.deepEqual(item.desc, itemInfo.desc);
-            assert.deepEqual(item.updateTime, new Date(Math.round(itemInfo.updateTime.getTime() / 1000) * 1000)); //lose precision when save into mysql
+            assert.deepEqual(item.updateTime, itemInfo.updateTime); 
             cb();
           });
         },
