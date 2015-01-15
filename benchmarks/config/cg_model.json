@@ -1,0 +1,10 @@
+{
+  "mysql_late": {
+    "cron": "* */2 * * * *",
+    "batchCount": 1000
+  },
+  "debug_mode": {
+    "info": false,
+    "sql": false
+  }
+}

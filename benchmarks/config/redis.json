@@ -1,0 +1,6 @@
+{
+	"cg_model_benchmark": {
+		"host": "localhost",
+		"port": 6389
+	}
+}

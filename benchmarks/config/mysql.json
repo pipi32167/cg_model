@@ -1,0 +1,11 @@
+{
+	"cg_model_benchmark": {
+		"connectionLimit": 10,
+		"host": "localhost",
+		"port": 3306,
+		"user": "yqb",
+		"password": "yqb",
+		"database": "cg_model_benchmark",
+		"multipleStatements": true
+	}
+}

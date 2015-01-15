@@ -1,3 +1,7 @@
+/**
+ * 测试插入批量数据
+ */
+
 'use strict';
 var async = require('async');
 var assert = require('assert');
