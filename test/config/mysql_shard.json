@@ -1,11 +1,11 @@
 {
-  "cg_model_test": {
+  "cg_model_shard_test": {
     "connectionLimit": 10,
     "host": "localhost",
     "port": 3306,
     "user": "yqb",
     "password": "yqb",
-    "database": "cg_model_test",
+    "database": "cg_model_shard_test",
     "multipleStatements": true
   },
   "debug_1": {

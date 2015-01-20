@@ -4,7 +4,7 @@ var mysql = require('mysql');
 var redis = require('redis');
 var CGModel = require('../lib');
 
-var dbName = 'model_test';
+var dbName = 'cg_model_test';
 var mysqlConfig = require('./config/mysql')[dbName];
 var pool = mysql.createPool(mysqlConfig);
 CGModel.setDBClient(dbName, pool);
@@ -39,13 +39,13 @@ CGModel.createModel({
 
   db: {
     type: 'mysql_late',
-    db_name: 'model_test',
+    db_name: 'cg_model_test',
     tbl_name: 'item',
   },
 
   cache: {
     type: 'redis',
-    cache_name: 'model_test',
+    cache_name: 'cg_model_test',
     name: 'item',
     prefix: 'test',
   },
