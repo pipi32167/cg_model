@@ -1,0 +1,6 @@
+{
+  "cg_model_shard_test": {
+    "host": "localhost",
+    "port": 6389
+  }
+}

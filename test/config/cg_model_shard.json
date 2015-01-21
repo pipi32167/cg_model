@@ -1,14 +1,19 @@
 {
-  "mysql_shard": {
-  	"shard_count": 2,
-  	"database": {
-  		"cg_model_shard_test": "cg_model_shard_test"
-  	},
-    "cron": "* * * * * *",
-    "batchCount": 3
-  },
-  "debug_mode": {
-    "info": false,
-    "sql": true
-  }
+	"mysql_shard": {
+		"shard_count": 2,
+		"database": {
+			"cg_model_shard_test": {
+				"main": "cg_model_shard_test",
+				"shard_format": "cg_model_shard_test_shard_%02d"
+			}
+		}
+	},
+	"mysql_late": {
+		"cron": "* * * * * *",
+		"batchCount": 3
+	},
+	"debug_mode": {
+		"info": false,
+		"sql": true
+	}
 }

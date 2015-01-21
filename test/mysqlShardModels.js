@@ -1,10 +1,13 @@
 'use strict';
-require('./shardInit');
+require('./mysqlShardInit');
+var assert = require('assert');
 var _s = require('underscore.string');
+var _ = require('underscore');
 var CGModel = require('../lib');
 
 var genUserId = function(cb) {
-  var sql = 'call gen_userId(1)';
+  var dbName = CGModel.get('config').mysql_shard.database.cg_model_shard_test.main;
+  var sql = 'call ' + dbName + '.gen_userId(1)';
   this.db.conn.query(sql, [], function(err, res) {
     if (!!err) {
       cb(err);
@@ -22,12 +25,25 @@ var genRegisterTime = function(cb) {
   cb(null, new Date());
 }
 
-var genDBNameByUserId = function (dbName) {
-  return function () {
+var genDBNameByUserId = function() {
+  var userId = this.userId;
+  var dbNames = this.model.def.db.db_names();
+  var idx = userId % dbNames.length;
+  return dbNames[idx];
+}
+
+var genDBNames = function(dbName) {
+  return function() {
     var config = CGModel.get('config').mysql_shard;
-    var shardCount = this.model.def.db.shard_count || config.shard_count;
-    var shardDBName = _s.sprintf('%s_shard_%d', config.database[dbName] || dbName, shardCount);
-    return shardDBName;
+    var shardCount = config.shard_count;
+    dbName = config.database[dbName] || dbName;
+    return _(0)
+      .chain()
+      .range(shardCount)
+      .map(function(idx) {
+        return _s.sprintf('%s_shard_%d', dbName, idx);
+      })
+      .value();
   }
 }
 
@@ -35,21 +51,45 @@ CGModel.createModel({
   name: 'User',
 
   props: {
-    userId:             { type: 'number', primary: true, defaultValue: genUserId, },
+    userId:             { type: 'number', primary: true, defaultValue: genUserId, shard: true },
     name:               { type: 'string', unique: true, defaultValue: genName, },
     money:              { type: 'number', sync: true, defaultValue: 0, },
-    registerTime:       { type: 'date', defaultValue: genRegisterTime, },
+    registerTime:       { type: 'date',   defaultValue: genRegisterTime, },
   },
 
   db: {
     type: 'mysql_shard',
-    db_name: genDBNameByUserId('cg_model_shard_test'),
+    db_name: 'cg_model_shard_test',
     tbl_name: 'user',
   },
 
   cache: {
     type: 'redis',
-    cache_name: 'cg_model_test',
+    cache_name: 'cg_model_shard_test',
+    name: 'user',
+    prefix: 'test',
+  },
+});
+
+CGModel.createModel({
+  name: 'User2',
+
+  props: {
+    userId:             { type: 'number', primary: true, shard: true },
+    name:               { type: 'string', defaultValue: genName, },
+    money:              { type: 'number', defaultValue: 0, },
+    registerTime:       { type: 'date',   defaultValue: genRegisterTime, },
+  },
+
+  db: {
+    type: 'mysql_shard',
+    db_name: 'cg_model_shard_test',
+    tbl_name: 'user',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'cg_model_shard_test',
     name: 'user',
     prefix: 'test',
   },

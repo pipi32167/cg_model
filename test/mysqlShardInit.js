@@ -9,7 +9,7 @@ var mysqlConfig = require('./config/mysql_shard')[dbName];
 var pool = mysql.createPool(mysqlConfig);
 CGModel.setDBClient(dbName, pool);
 
-var redisConfig = require('./config/redis')[dbName];
+var redisConfig = require('./config/redis_shard')[dbName];
 var redisClient = redis.createClient(redisConfig.port, redisConfig.host);
 CGModel.setCacheClient(dbName, redisClient);
 
