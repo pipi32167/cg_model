@@ -119,6 +119,31 @@ describe('lib/data/data_mysql_shard', function() {
 				done();
 			})
 		});
+
+		it('should update user success when nothing to update', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+
+			var user = new User();
+
+			async.series({
+				create: function(cb) {
+					user.createSync(function(err) {
+						assert.ok(!err, err);
+						cb();
+					});
+				},
+
+				update: function(cb) {
+					user.updateSync(function(err) {
+						assert.ok(!err, err);
+						cb();
+					})
+				},
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
 	});
 
 	describe('update', function() {
@@ -833,6 +858,31 @@ describe('lib/data/data_mysql_shard(no shard)', function() {
 
 				update: function(cb) {
 					user.money++;
+					user.updateSync(function(err) {
+						assert.ok(!err, err);
+						cb();
+					})
+				},
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
+
+		it('should update user success when nothing to update', function(done) {
+			var User = CGModel.getModel('UserNoShardSync');
+
+			var user = new User();
+
+			async.series({
+				create: function(cb) {
+					user.createSync(function(err) {
+						assert.ok(!err, err);
+						cb();
+					});
+				},
+
+				update: function(cb) {
 					user.updateSync(function(err) {
 						assert.ok(!err, err);
 						cb();
