@@ -6,9 +6,9 @@ var _ = require('underscore');
 var CGModel = require('../lib');
 
 var genUserId = function(cb) {
-  var dbName = CGModel.get('config').mysql_shard.database.cg_model_shard_test.main;
-  var sql = 'call ' + dbName + '.gen_userId(1)';
-  this.db.conn.query(sql, [], function(err, res) {
+  var dbName = this.db.getMainDBName();
+  var sql = 'CALL `' + dbName + '`.`gen_userId`(1);';
+  this.db.query(sql, [], function(err, res) {
     if (!!err) {
       cb(err);
       return;
@@ -48,7 +48,7 @@ var genDBNames = function(dbName) {
 }
 
 CGModel.createModel({
-  name: 'User',
+  name: 'UserShardSync',
 
   props: {
     userId:             { type: 'number', primary: true, defaultValue: genUserId, shard: true },
@@ -72,10 +72,58 @@ CGModel.createModel({
 });
 
 CGModel.createModel({
-  name: 'User2',
+  name: 'UserShardAsync',
 
   props: {
     userId:             { type: 'number', primary: true, shard: true },
+    name:               { type: 'string', defaultValue: genName, },
+    money:              { type: 'number', defaultValue: 0, },
+    registerTime:       { type: 'date',   defaultValue: genRegisterTime, },
+  },
+
+  db: {
+    type: 'mysql_shard',
+    db_name: 'cg_model_shard_test',
+    tbl_name: 'user',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'cg_model_shard_test',
+    name: 'user',
+    prefix: 'test',
+  },
+});
+
+CGModel.createModel({
+  name: 'UserNoShardSync',
+
+  props: {
+    userId:             { type: 'number', primary: true, defaultValue: genUserId },
+    name:               { type: 'string', defaultValue: genName, },
+    money:              { type: 'number', defaultValue: 0, },
+    registerTime:       { type: 'date',   defaultValue: genRegisterTime, },
+  },
+
+  db: {
+    type: 'mysql_shard',
+    db_name: 'cg_model_shard_test',
+    tbl_name: 'user',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'cg_model_shard_test',
+    name: 'user',
+    prefix: 'test',
+  },
+});
+
+CGModel.createModel({
+  name: 'UserNoShardAsync',
+
+  props: {
+    userId:             { type: 'number', primary: true },
     name:               { type: 'string', defaultValue: genName, },
     money:              { type: 'number', defaultValue: 0, },
     registerTime:       { type: 'date',   defaultValue: genRegisterTime, },

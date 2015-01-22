@@ -3,8 +3,8 @@
 		"shard_count": 2,
 		"database": {
 			"cg_model_shard_test": {
-				"main": "cg_model_shard_test",
-				"shard_format": "cg_model_shard_test_shard_%02d"
+				"main_db": "cg_model_shard_test",
+				"shard_db_format": "cg_model_shard_test_shard_%02d"
 			}
 		}
 	},
