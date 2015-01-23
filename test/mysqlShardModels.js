@@ -1,8 +1,8 @@
 'use strict';
 require('./mysqlShardInit');
-var assert = require('assert');
-var _s = require('underscore.string');
-var _ = require('underscore');
+// var assert = require('assert');
+// var _s = require('underscore.string');
+// var _ = require('underscore');
 var CGModel = require('../lib');
 
 var genUserId = function(cb) {
