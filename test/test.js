@@ -684,8 +684,12 @@ describe('User Model', function() {
             userId: user.userId,
             name: '0' + user.name,
           });
+          assert.ok(user.cache.isModified());
+          assert.ok(user.db.isModified());
           user.update(function(err) {
             assert.ok(!err, err);
+            assert.ok(!user.cache.isModified());
+            assert.ok(!user.db.isModified());
             cb();
           });
         },
