@@ -4,13 +4,20 @@ var redis = require('redis');
 var CGModel = require('../lib');
 
 // CGModel.debug_mode = true;
-var dbName = 'cg_model_shard_test';
-var mysqlConfig = require('./config/mysql_shard')[dbName];
-var pool = mysql.createPool(mysqlConfig);
-CGModel.setDBClient(dbName, pool);
+var key, config, client;
 
-var redisConfig = require('./config/redis_shard')[dbName];
-var redisClient = redis.createClient(redisConfig.port, redisConfig.host);
-CGModel.setCacheClient(dbName, redisClient);
+var mysqlConfig = require('./config/mysql_shard');
+for (key in mysqlConfig) {
+	config = mysqlConfig[key];
+	client = mysql.createPool(config);
+	CGModel.setDBClient(key, client);
+}
+
+var redisConfig = require('./config/redis_shard');
+for (key in redisConfig) {
+	config = redisConfig[key];
+	client = redis.createClient(config.port, config.host);
+	CGModel.setCacheClient(key, client);
+}
 
 CGModel.initialize(require('./config/cg_model_shard'));

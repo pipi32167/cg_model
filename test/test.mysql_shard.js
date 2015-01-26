@@ -9,16 +9,16 @@ require('./mysqlShardInit');
 require('./mysqlShardModels');
 
 beforeEach(function(done) {
-	CGModel.startCronJob('mysql_late')
+	CGModel.startCronJob('mysql_shard')
 	done();
 });
 
 afterEach(function(done) {
-	CGModel.stopCronJob('mysql_late', done);
+	CGModel.stopCronJob('mysql_shard', done);
 });
 
 
-describe('lib/data/data_mysql_shard', function() {
+describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 
 	beforeEach(function(done) {
 
@@ -68,7 +68,12 @@ describe('lib/data/data_mysql_shard', function() {
 
 		it('should create many users success', function(done) {
 
-			var userIds = _.range(1, 11);
+			var userIds = _(1)
+				.chain()
+				.range(100)
+				.sample(10)
+				.value();
+
 			var User = CGModel.getModel('UserShardAsync');
 
 			async.map(
@@ -445,12 +450,9 @@ describe('lib/data/data_mysql_shard', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -484,6 +486,78 @@ describe('lib/data/data_mysql_shard', function() {
 			})
 		});
 	});
+
+	describe('static find all', function() {
+
+		it('should find all user success', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+
+			var user = new User();
+			async.series({
+				create: function(cb) {
+					user.create(function(err) {
+						assert.ok(!err, err);
+						cb();
+					})
+				},
+
+				findAll: function(cb) {
+					User.findAll(function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, 1);
+						cb();
+					})
+				}
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
+
+		it('should find all users success', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+
+			var count = 10;
+			var users = [];
+			_.times(count, function() {
+				users.push(new User());
+			})
+			async.series({
+				create: function(cb) {
+
+					async.each(
+						users,
+						function(user, cb) {
+							user.createSync(function(err) {
+								assert.ok(!err, err);
+								cb();
+							});
+						}, cb);
+				},
+
+				findAll: function(cb) {
+					User.findAll(function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, users.length);
+						cb();
+					})
+				}
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
+
+		it('should find no user success', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+			User.findAll(function(err, res) {
+				assert.ok(!err, err);
+				assert.equal(res.length, 0);
+				done();
+			})
+		});
+	});
+
 
 	describe('static remove', function() {
 
@@ -537,12 +611,9 @@ describe('lib/data/data_mysql_shard', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -595,12 +666,9 @@ describe('lib/data/data_mysql_shard', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -674,12 +742,9 @@ describe('lib/data/data_mysql_shard', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -730,12 +795,9 @@ describe('lib/data/data_mysql_shard', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -1194,12 +1256,9 @@ describe('lib/data/data_mysql_shard(no shard)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -1286,12 +1345,9 @@ describe('lib/data/data_mysql_shard(no shard)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -1344,12 +1400,9 @@ describe('lib/data/data_mysql_shard(no shard)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -1423,12 +1476,9 @@ describe('lib/data/data_mysql_shard(no shard)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -1479,12 +1529,9 @@ describe('lib/data/data_mysql_shard(no shard)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -1944,12 +1991,9 @@ describe('lib/data/data_mysql_shard(shard 0)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -2036,12 +2080,9 @@ describe('lib/data/data_mysql_shard(shard 0)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -2094,12 +2135,9 @@ describe('lib/data/data_mysql_shard(shard 0)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -2173,12 +2211,9 @@ describe('lib/data/data_mysql_shard(shard 0)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},
@@ -2229,12 +2264,9 @@ describe('lib/data/data_mysql_shard(shard 0)', function() {
 					async.each(
 						users,
 						function(user, cb) {
-							user.db.once('updated', function(err) {
+							user.createSync(function(err) {
 								assert.ok(!err, err);
 								cb();
-							});
-							user.create(function(err) {
-								assert.ok(!err, err);
 							});
 						}, cb);
 				},

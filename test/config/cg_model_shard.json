@@ -1,19 +1,28 @@
 {
 	"mysql_shard": {
+		"cron": "* * * * * *",
+		"batchCount": 100,
 		"shard_count": 2,
 		"database": {
 			"cg_model_shard_test": {
 				"main_db": "cg_model_shard_test",
-				"shard_db_format": "cg_model_shard_test_shard_%02d"
+				"shard_db_format": "cg_model_shard_test_shard_%02d",
+				"connection": {
+					"cg_model_shard_test_main": [
+						"cg_model_shard_test"
+					],
+					"cg_model_shard_test_0": [
+						"cg_model_shard_test_shard_00"
+					],
+					"cg_model_shard_test_1": [
+						"cg_model_shard_test_shard_01"
+					]
+				}
 			}
 		}
 	},
-	"mysql_late": {
-		"cron": "* * * * * *",
-		"batchCount": 3
-	},
 	"debug_mode": {
 		"info": false,
-		"sql": true
+		"sql": false
 	}
 }

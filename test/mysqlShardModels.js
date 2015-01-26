@@ -8,7 +8,8 @@ var CGModel = require('../lib');
 var genUserId = function(cb) {
   var dbName = this.db.getMainDBName();
   var sql = 'CALL `' + dbName + '`.`gen_userId`(1);';
-  this.db.query(sql, [], function(err, res) {
+  var conn = CGModel.getMysqlShardDBConn(dbName);
+  conn.query(sql, [], function(err, res) {
     if (!!err) {
       cb(err);
       return;
