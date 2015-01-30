@@ -309,6 +309,13 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 	});
 
 	describe('load', function() {
+		before(function(done) {
+			var Item = CGModel.getModel('ItemShardSync');
+			Item.removeAll(function(err) {
+				assert.ok(!err, err);
+				done();
+			});
+		});
 		it('should load user success', function(done) {
 			var User = CGModel.getModel('UserShardSync');
 
@@ -359,6 +366,44 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 						cb();
 					});
 				}
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
+
+		it('should occur error when shard key is not specified', function(done) {
+			var Item = CGModel.getModel('ItemShardSync');
+
+			// done();
+			var item = new Item();
+			var item2;
+
+			async.series({
+				create: function(cb) {
+					item.itemId = 1;
+					item.createSync(function(err) {
+						assert.ok(!err, err);
+						cb();
+					});
+				},
+
+				load: function(cb) {
+					item2 = new Item();
+					item2.id = item.id;
+
+					assert.throws(function() {
+						item2.db.load(function(err) {
+							assert.ok(!err, err);
+							cb();
+						});
+					});
+					item2.itemId = item.itemId;
+					item2.db.load(function(err) {
+						assert.ok(!err, err);
+						cb();
+					});
+				},
 			}, function(err) {
 				assert.ok(!err, err);
 				done();
@@ -557,7 +602,6 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 			})
 		});
 	});
-
 
 	describe('static remove', function() {
 
