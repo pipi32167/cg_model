@@ -1,0 +1,9 @@
+{
+	"redis_ttl": {
+		"expire": 100
+	},
+	"debug_mode": {
+		"info": false,
+		"sql": false
+	}
+}

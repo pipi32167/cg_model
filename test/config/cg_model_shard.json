@@ -23,6 +23,6 @@
 	},
 	"debug_mode": {
 		"info": false,
-		"sql": true
+		"sql": false
 	}
 }
