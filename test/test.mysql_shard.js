@@ -41,7 +41,7 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 					cb();
 				});
 			},
-			
+
 
 		}, function(err) {
 			assert.ok(!err, err);
@@ -563,8 +563,8 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 
 					Item.find({
 						id: item.id
-					}, function (err, res) {
-						
+					}, function(err, res) {
+
 						assert.ok(!err, err);
 						assert.equal(res.length, 1);
 						res = res[0];
@@ -577,6 +577,185 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 				assert.ok(!err, err);
 				done();
 			})
+		});
+
+		it('should find user with order success', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+			var users = [];
+			var count = 20;
+			async.series({
+				create: function(cb) {
+					async.timesSeries(
+						count,
+						function(idx, cb) {
+							var user = new User();
+							user.registerTime = new Date(Date.now() + Math.floor(Math.random() * 10000));
+							user.money = Math.floor(Math.random() * 10)
+							user.createSync(function(err) {
+								assert.ok(!err, err);
+								users.push(user);
+								cb();
+							});
+						}, cb);
+				},
+
+				find: function(cb) {
+					User.find({
+						$select: ['*'],
+						$order: {
+							registerTime: 'asc'
+						}
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, count);
+						for (var i = 1; i < res.length; i++) {
+							// console.log(res[i - 1], res[i]);
+							assert.ok(res[i - 1].registerTime <= res[i].registerTime);
+						};
+						cb();
+					})
+				},
+
+				find2: function(cb) {
+					User.find({
+						$select: ['*'],
+						$order: {
+							registerTime: 'desc'
+						}
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, count);
+						for (var i = 1; i < res.length; i++) {
+							// console.log(res[i - 1], res[i]);
+							assert.ok(res[i - 1].registerTime >= res[i].registerTime);
+						};
+						cb();
+					})
+				},
+
+				find3: function(cb) {
+					User.find({
+						$select: ['*'],
+						$order: {
+							money: 'asc',
+							registerTime: 'desc'
+						}
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, count);
+						for (var i = 1; i < res.length; i++) {
+							assert.ok(res[i - 1].money <= res[i].money);
+							if (res[i - 1].money === res[i].money) {
+								assert.ok(res[i - 1].registerTime >= res[i].registerTime);
+							}
+						};
+						cb();
+					})
+				},
+
+				find4: function(cb) {
+					User.find({
+						$select: ['*'],
+						$order: {
+							money: 'desc',
+							registerTime: 'asc',
+						}
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, count);
+						for (var i = 1; i < res.length; i++) {
+							assert.ok(res[i - 1].money >= res[i].money);
+							if (res[i - 1].money === res[i].money) {
+								assert.ok(res[i - 1].registerTime <= res[i].registerTime);
+							}
+						};
+						cb();
+					})
+				},
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			});
+		});
+
+		it('should find users by limit success', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+			var users = [];
+			var count = 100, limit = 20;
+			async.series({
+				create: function(cb) {
+					async.timesSeries(
+						count,
+						function(idx, cb) {
+							var user = new User();
+							user.registerTime = new Date(Date.now() + Math.floor(Math.random() * 10000));
+							user.money = Math.floor(Math.random() * 10)
+							user.createSync(function(err) {
+								assert.ok(!err, err);
+								users.push(user);
+								cb();
+							});
+						}, cb);
+				},
+
+				find: function(cb) {
+					User.find({
+						$select: ['*'],
+						$limit: limit,
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, limit);
+						cb();
+					})
+				},
+
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			});
+		});
+
+		it('should find user with order and limit success', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+			var users = [];
+			var count = 100, limit = 20;
+			async.series({
+				create: function(cb) {
+					async.timesSeries(
+						count,
+						function(idx, cb) {
+							var user = new User();
+							user.registerTime = new Date(Date.now() + Math.floor(Math.random() * 10000));
+							user.money = Math.floor(Math.random() * 10)
+							user.createSync(function(err) {
+								assert.ok(!err, err);
+								users.push(user);
+								cb();
+							});
+						}, cb);
+				},
+
+				find: function(cb) {
+					User.find({
+						$select: ['*'],
+						$order: {
+							registerTime: 'asc'
+						},
+						$limit: limit,
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, limit);
+						for (var i = 1; i < res.length; i++) {
+							// console.log(res[i - 1], res[i]);
+							assert.ok(res[i - 1].registerTime <= res[i].registerTime);
+						};
+						cb();
+					})
+				},
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			});
 		});
 	});
 
