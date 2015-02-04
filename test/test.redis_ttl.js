@@ -52,6 +52,7 @@ describe('lib/data/data_redis_ttl', function() {
 					user2.cache.load(function(err) {
 						assert.ok(!err, err);
 						assert.ok(user2.cache.isSaved);
+						assert.deepEqual(user2.cache.p(), user.p());
 						cb();
 					});
 				},
@@ -97,6 +98,7 @@ describe('lib/data/data_redis_ttl', function() {
 					user2.cache.load(function(err) {
 						assert.ok(!err, err);
 						assert.ok(user2.cache.isSaved);
+						assert.deepEqual(user2.cache.p(), user.p());
 						cb();
 					});
 				},
@@ -124,7 +126,7 @@ describe('lib/data/data_redis_ttl', function() {
 					user2.cache.load(function(err) {
 						assert.ok(!err, err);
 						assert.ok(user2.cache.isSaved);
-						assert.equal(user2.cache.p('money'), user.money);
+						assert.deepEqual(user2.cache.p(), user.p());
 						cb();
 					});
 				},
