@@ -1,5 +1,4 @@
 'use strict';
-require('./mysqlShardInit');
 // var assert = require('assert');
 // var _s = require('underscore.string');
 // var _ = require('underscore');
