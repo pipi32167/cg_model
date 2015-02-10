@@ -412,6 +412,64 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 				done();
 			})
 		});
+
+		it('should load users success', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+
+			var count = 10;
+			var users = [];
+			_.times(count, function() {
+				users.push(new User());
+			})
+			async.series({
+				create: function(cb) {
+
+					async.each(
+						users,
+						function(user, cb) {
+							user.createSync(function(err) {
+								assert.ok(!err, err);
+								cb();
+							});
+						}, cb);
+				},
+
+				removeFromCache: function(cb) {
+					async.each(
+						users,
+						function(user, cb) {
+							user.cache.remove(function(err) {
+								assert.ok(!err, err);
+								cb();
+							})
+						}, cb);
+				},
+
+				loadFromDB: function(cb) {
+					var users2 = _(users).map(function(elem) {
+						var res = new User();
+						res.userId = elem.userId;
+						return res;
+					});
+
+					async.each(
+						users2,
+						function(user, cb) {
+							user.load(function(err) {
+								assert.ok(!err, err);
+								assert.ok(user.mem.isLoaded);
+								assert.deepEqual(user.p(), _(users).find(function (elem) {
+									return elem.userId === user.userId;
+								}).p());
+								cb();
+							});
+						}, cb);
+				}
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
 	});
 
 	describe('remove', function() {
@@ -681,7 +739,8 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 		it('should find users by limit success', function(done) {
 			var User = CGModel.getModel('UserShardSync');
 			var users = [];
-			var count = 100, limit = 20;
+			var count = 100,
+				limit = 20;
 			async.series({
 				create: function(cb) {
 					async.timesSeries(
@@ -718,7 +777,8 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 		it('should find user with order and limit success', function(done) {
 			var User = CGModel.getModel('UserShardSync');
 			var users = [];
-			var count = 100, limit = 20;
+			var count = 100,
+				limit = 20;
 			async.series({
 				create: function(cb) {
 					async.timesSeries(
