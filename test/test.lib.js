@@ -215,4 +215,11 @@ describe('Lib', function() {
 			});
 		});
 	});
+
+
+	describe('restartCronJob', function() {
+		it('should restart cron job success', function(done) {
+			CGModel.restartCronJob('mysql_late', done);
+		});
+	});
 });

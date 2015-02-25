@@ -1,10 +1,11 @@
 {
-  "mysql_late": {
-    "cron": "* * * * * *",
-    "batchCount": 3
-  },
-  "debug_mode": {
-    "info": false,
-    "sql": false
-  }
+	"mysql_late": {
+		"cron": "* * * * * *",
+		"batchCount": 3
+	},
+	"debug_mode": {
+		"info": false,
+		"sql": false,
+		"redis": false
+	}
 }

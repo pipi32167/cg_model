@@ -11,12 +11,14 @@ var genUserId = function(cb) {
       cb(err);
       return;
     }
-    cb(null, res[0][0].id);
+    var userId = res[0][0].id;
+    cb(null, userId);
   });
 }
 
 var genName = function(cb) {
-  cb(null, 'test' + this.p('userId'));
+  var res = 'test' + this.userId;
+  cb(null, res);
 }
 
 var genRegisterTime = function(cb) {

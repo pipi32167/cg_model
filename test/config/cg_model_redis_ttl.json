@@ -5,6 +5,6 @@
 	"debug_mode": {
 		"info": false,
 		"sql": false,
-		"redis": true
+		"redis": false
 	}
 }
