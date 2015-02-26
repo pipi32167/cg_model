@@ -6,6 +6,7 @@
 	"debug_mode": {
 		"info": false,
 		"sql": false,
-		"redis": false
+		"redis": false,
+		"profile": true
 	}
 }
