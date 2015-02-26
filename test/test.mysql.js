@@ -144,6 +144,88 @@ describe('lib/data/data_mysql', function() {
 				done();
 			})
 		});
+
+		it('should add a user to the bucket success', function(done) {
+			var bucket = new CGModel.Bucket();
+
+			var User = CGModel.getModel('User');
+			var userId;
+			var user;
+			async.series({
+				create: function(cb) {
+
+					user = new User(bucket);
+					user.create(function(err) {
+						assert.ok(!err, err);
+						userId = user.userId;
+						assert.equal(bucket.size(), 0);
+						user.money++;
+						assert.equal(bucket.size(), 1);
+						user.money++;
+						assert.equal(bucket.size(), 1);
+						var models = bucket.pour();
+						assert.ok(models[user.__id]);
+						assert.equal(bucket.size(), 0);
+						user.money++;
+						assert.equal(bucket.size(), 1);
+						cb();
+					})
+				},
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			});
+		});
+
+		it('should add many users to the bucket success', function(done) {
+			var bucket = new CGModel.Bucket();
+
+			var User = CGModel.getModel('User');
+			var user, users = [];
+			var count = 5;
+			async.series({
+				createUsers: function(cb) {
+
+					async.times(
+						count,
+						function(idx, cb) {
+							user = new User(bucket);
+							users.push(user);
+							user.create(function(err) {
+								assert.ok(!err, err);
+								cb();
+							});
+						},
+						function(err) {
+							assert.ok(!err, err);
+							assert.equal(bucket.size(), 0);
+							cb();
+						});
+				},
+
+				modify: function(cb) {
+					users.forEach(function(elem) {
+						elem.money++;
+					});
+
+					assert.equal(bucket.size(), count);
+
+					users.forEach(function(elem) {
+						elem.money++;
+					});
+
+					assert.equal(bucket.size(), count);
+
+					bucket.pour();
+
+					assert.equal(bucket.size(), 0);
+					cb();
+				}
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			});
+		});
 	});
 
 	describe('isModified', function() {
@@ -230,7 +312,7 @@ describe('lib/data/data_mysql', function() {
 				done();
 			})
 		});
-		
+
 		it('should return true when the loaded user is modified', function(done) {
 			var User = CGModel.getModel('User');
 
