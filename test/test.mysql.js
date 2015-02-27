@@ -723,44 +723,6 @@ describe('lib/data/data_mysql', function() {
 			});
 		});
 
-		it('should update user failed when property type is invalid', function(done) {
-
-			var User = CGModel.getModel('User');
-			var userId, user;
-
-			async.series({
-				create: function(cb) {
-
-					user = new User();
-					user.create(function(err) {
-						assert.ok(!err, err);
-						userId = user.p('userId');
-						helper.checkModelIsLoaded(user);
-						cb();
-					});
-				},
-
-				update: function(cb) {
-					user.p({
-						userId: user.userId,
-						name: 1,
-					});
-
-					assert.throws(function() {
-
-						user.update(function(err) {
-							assert.ok(!err, err);
-						});
-					});
-					cb();
-				},
-
-			}, function(err) {
-				assert.ok(!err, err);
-				done();
-			});
-		});
-
 		it('should update friend success', function(done) {
 			var Friend = CGModel.getModel('Friend');
 			var friend1, friend2;

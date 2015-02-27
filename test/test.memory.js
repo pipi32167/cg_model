@@ -1,178 +1,117 @@
 'use strict';
 var assert = require('assert');
+var async = require('async');
 var CGModel = require('../lib');
 require('./init');
 require('./models');
+var helper = require('./helper');
 
 describe('lib/data/data_memory', function() {
-  it('should check properties success', function() {
-    var Item5 = CGModel.getModel('Item5');
 
-    var item = {};
-    assert.throws(function() {
-      Item5.checkProps(item);
-    });
+  describe('p', function() {
 
-    item = {
-      id: '1'
-    };
-    assert.throws(function() {
-      Item5.checkProps(item);
-    });
+    it('should change user failed when the property type is invalid', function(done) {
 
-    item = {
-      id: 1,
-      itemId: 1,
-      isLock: true,
-      desc: '',
-      updateTime: new Date(),
-      properties1: {},
-      properties2: [],
-    };
-    Item5.checkProps(item);
+      var User = CGModel.getModel('User');
+      var userId, user;
 
-    item = {
-      id: 1,
-      itemId: 1,
-      isLock: true,
-      desc: '',
-      updateTime: new Date().toString(),
-      properties1: {},
-      properties2: [],
-    };
-    assert.throws(function() {
-      Item5.checkProps(item);
-    });
+      async.series({
+        create: function(cb) {
 
-    item = {
-      id: 1,
-      itemId: 1,
-      isLock: true,
-      desc: '',
-      updateTime: new Date(),
-      properties1: [],
-      properties2: [],
-    };
-    assert.throws(function() {
-      Item5.checkProps(item);
-    });
+          user = new User();
+          user.create(function(err) {
+            assert.ok(!err, err);
+            userId = user.p('userId');
+            helper.checkModelIsLoaded(user);
+            cb();
+          });
+        },
 
-    item = {
-      id: 1,
-      itemId: 1,
-      isLock: true,
-      desc: '',
-      updateTime: new Date(),
-      properties1: [],
-      properties2: {},
-    };
-    assert.throws(function() {
-      Item5.checkProps(item);
-    });
+        update: function(cb) {
+          assert.throws(function() {
+            user.p({
+              userId: user.userId,
+              name: 1,
+            });
+          });
+          cb();
+        },
 
-    item = {
-      id: 1,
-      itemId: 1,
-      isLock: false,
-      desc: '',
-      updateTime: new Date(),
-      properties1: {},
-      properties2: [],
-    };
-    Item5.checkProps(item);
-  });
-
-  it('should check item wrapper properties success', function() {
-    var Item5Wrapper = CGModel.getModel('Item5Wrapper');
-    var wrapper = {
-      item: {
-        id: 1,
-        itemId: 1,
-        isLock: false,
-        desc: '',
-        updateTime: new Date(),
-        properties1: {},
-        properties2: [],
-      }
-    };
-
-    Item5Wrapper.checkProps(wrapper);
-
-    wrapper = {};
-    assert.throws(function() {
-      Item5Wrapper.checkProps(wrapper);
-    });
-
-    wrapper = {
-      item: {
-        id: '1',
-        itemId: 1,
-        isLock: false,
-        desc: '',
-        updateTime: new Date(),
-        properties1: {},
-        properties2: [],
-      }
-    };
-    assert.throws(function() {
-      Item5Wrapper.checkProps(wrapper);
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      });
     });
   });
 
-  it('should check item array properties success', function() {
-    var Item5Array = CGModel.getModel('Item5Array');
-    var array = {};
+  describe('static checkProps', function() {
 
-    assert.throws(function() {
-      Item5Array.checkProps(array);
-    });
+    it('should check properties success', function() {
+      var Item5 = CGModel.getModel('Item5');
 
-    array = {
-      items: {}
-    };
-    assert.throws(function() {
-      Item5Array.checkProps(array);
-    });
+      var item = {};
+      assert.throws(function() {
+        Item5.checkProps(item);
+      });
 
-    array = {
-      items: [{
-        id: '1',
+      item = {
+        id: '1'
+      };
+      assert.throws(function() {
+        Item5.checkProps(item);
+      });
+
+      item = {
+        id: 1,
         itemId: 1,
-        isLock: false,
+        isLock: true,
         desc: '',
         updateTime: new Date(),
         properties1: {},
         properties2: [],
-      }]
-    };
-    assert.throws(function() {
-      Item5Array.checkProps(array);
-    });
-    array = {
-      items: [{
+      };
+      Item5.checkProps(item);
+
+      item = {
         id: 1,
         itemId: 1,
-        isLock: false,
-        desc: '',
-        updateTime: new Date(),
-        properties1: {},
-        properties2: [],
-      }, {
-        id: 1,
-        itemId: 1,
-        isLock: false,
+        isLock: true,
         desc: '',
         updateTime: new Date().toString(),
         properties1: {},
         properties2: [],
-      }]
-    };
-    assert.throws(function() {
-      Item5Array.checkProps(array);
-    });
+      };
+      assert.throws(function() {
+        Item5.checkProps(item);
+      });
 
-    array = {
-      items: [{
+      item = {
+        id: 1,
+        itemId: 1,
+        isLock: true,
+        desc: '',
+        updateTime: new Date(),
+        properties1: [],
+        properties2: [],
+      };
+      assert.throws(function() {
+        Item5.checkProps(item);
+      });
+
+      item = {
+        id: 1,
+        itemId: 1,
+        isLock: true,
+        desc: '',
+        updateTime: new Date(),
+        properties1: [],
+        properties2: {},
+      };
+      assert.throws(function() {
+        Item5.checkProps(item);
+      });
+
+      item = {
         id: 1,
         itemId: 1,
         isLock: false,
@@ -180,51 +119,33 @@ describe('lib/data/data_memory', function() {
         updateTime: new Date(),
         properties1: {},
         properties2: [],
-      }, {
-        id: 1,
-        itemId: 1,
-        isLock: false,
-        desc: '',
-        updateTime: new Date(),
-        properties1: {},
-        properties2: [],
-      }]
-    };
-    Item5Array.checkProps(array);
-  });
-
-  it('should check item dict properties success', function() {
-    var Item5Dict = CGModel.getModel('Item5Dict');
-    var dict = {};
-
-    assert.throws(function() {
-      Item5Dict.checkProps(dict);
+      };
+      Item5.checkProps(item);
     });
 
-    dict = {
-      items: ''
-    };
-    assert.throws(function() {
-      Item5Dict.checkProps(dict);
-    });
+    it('should check item wrapper properties success', function() {
+      var Item5Wrapper = CGModel.getModel('Item5Wrapper');
+      var wrapper = {
+        item: {
+          id: 1,
+          itemId: 1,
+          isLock: false,
+          desc: '',
+          updateTime: new Date(),
+          properties1: {},
+          properties2: [],
+        }
+      };
 
-    dict = {
-      items: {}
-    };
-    Item5Dict.checkProps(dict);
+      Item5Wrapper.checkProps(wrapper);
 
-    dict = {
-      items: {
-        item1: {}
-      }
-    };
-    assert.throws(function() {
-      Item5Dict.checkProps(dict);
-    });
+      wrapper = {};
+      assert.throws(function() {
+        Item5Wrapper.checkProps(wrapper);
+      });
 
-    dict = {
-      items: {
-        item1: {
+      wrapper = {
+        item: {
           id: '1',
           itemId: 1,
           isLock: false,
@@ -233,15 +154,43 @@ describe('lib/data/data_memory', function() {
           properties1: {},
           properties2: [],
         }
-      }
-    };
-    assert.throws(function() {
-      Item5Dict.checkProps(dict);
+      };
+      assert.throws(function() {
+        Item5Wrapper.checkProps(wrapper);
+      });
     });
 
-    dict = {
-      items: {
-        item1: {
+    it('should check item array properties success', function() {
+      var Item5Array = CGModel.getModel('Item5Array');
+      var array = {};
+
+      assert.throws(function() {
+        Item5Array.checkProps(array);
+      });
+
+      array = {
+        items: {}
+      };
+      assert.throws(function() {
+        Item5Array.checkProps(array);
+      });
+
+      array = {
+        items: [{
+          id: '1',
+          itemId: 1,
+          isLock: false,
+          desc: '',
+          updateTime: new Date(),
+          properties1: {},
+          properties2: [],
+        }]
+      };
+      assert.throws(function() {
+        Item5Array.checkProps(array);
+      });
+      array = {
+        items: [{
           id: 1,
           itemId: 1,
           isLock: false,
@@ -249,9 +198,7 @@ describe('lib/data/data_memory', function() {
           updateTime: new Date(),
           properties1: {},
           properties2: [],
-        },
-
-        item2: {
+        }, {
           id: 1,
           itemId: 1,
           isLock: false,
@@ -259,36 +206,131 @@ describe('lib/data/data_memory', function() {
           updateTime: new Date().toString(),
           properties1: {},
           properties2: [],
-        }
-      }
-    };
-    assert.throws(function() {
-      Item5Dict.checkProps(dict);
+        }]
+      };
+      assert.throws(function() {
+        Item5Array.checkProps(array);
+      });
+
+      array = {
+        items: [{
+          id: 1,
+          itemId: 1,
+          isLock: false,
+          desc: '',
+          updateTime: new Date(),
+          properties1: {},
+          properties2: [],
+        }, {
+          id: 1,
+          itemId: 1,
+          isLock: false,
+          desc: '',
+          updateTime: new Date(),
+          properties1: {},
+          properties2: [],
+        }]
+      };
+      Item5Array.checkProps(array);
     });
 
-    dict = {
-      items: {
-        item1: {
-          id: 1,
-          itemId: 1,
-          isLock: false,
-          desc: '',
-          updateTime: new Date(),
-          properties1: {},
-          properties2: [],
-        },
+    it('should check item dict properties success', function() {
+      var Item5Dict = CGModel.getModel('Item5Dict');
+      var dict = {};
 
-        item2: {
-          id: 1,
-          itemId: 1,
-          isLock: false,
-          desc: '',
-          updateTime: new Date(),
-          properties1: {},
-          properties2: [],
+      assert.throws(function() {
+        Item5Dict.checkProps(dict);
+      });
+
+      dict = {
+        items: ''
+      };
+      assert.throws(function() {
+        Item5Dict.checkProps(dict);
+      });
+
+      dict = {
+        items: {}
+      };
+      Item5Dict.checkProps(dict);
+
+      dict = {
+        items: {
+          item1: {}
         }
-      }
-    };
-    Item5Dict.checkProps(dict);
-  })
+      };
+      assert.throws(function() {
+        Item5Dict.checkProps(dict);
+      });
+
+      dict = {
+        items: {
+          item1: {
+            id: '1',
+            itemId: 1,
+            isLock: false,
+            desc: '',
+            updateTime: new Date(),
+            properties1: {},
+            properties2: [],
+          }
+        }
+      };
+      assert.throws(function() {
+        Item5Dict.checkProps(dict);
+      });
+
+      dict = {
+        items: {
+          item1: {
+            id: 1,
+            itemId: 1,
+            isLock: false,
+            desc: '',
+            updateTime: new Date(),
+            properties1: {},
+            properties2: [],
+          },
+
+          item2: {
+            id: 1,
+            itemId: 1,
+            isLock: false,
+            desc: '',
+            updateTime: new Date().toString(),
+            properties1: {},
+            properties2: [],
+          }
+        }
+      };
+      assert.throws(function() {
+        Item5Dict.checkProps(dict);
+      });
+
+      dict = {
+        items: {
+          item1: {
+            id: 1,
+            itemId: 1,
+            isLock: false,
+            desc: '',
+            updateTime: new Date(),
+            properties1: {},
+            properties2: [],
+          },
+
+          item2: {
+            id: 1,
+            itemId: 1,
+            isLock: false,
+            desc: '',
+            updateTime: new Date(),
+            properties1: {},
+            properties2: [],
+          }
+        }
+      };
+      Item5Dict.checkProps(dict);
+    })
+  });
 });
