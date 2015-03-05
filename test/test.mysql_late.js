@@ -12,7 +12,7 @@ require('./models');
 describe('lib/data/data_mysql_late', function() {
 	beforeEach(function(done) {
 		CGModel.initialize(require('./config/cg_model'));
-		CGModel.startCronJob('mysql_late');
+		CGModel.start();
 		async.parallel({
 
 			removeAllItems: function(cb) {
@@ -33,7 +33,7 @@ describe('lib/data/data_mysql_late', function() {
 	});
 
 	afterEach(function(done) {
-		CGModel.stopCronJob('mysql_late', done);
+		CGModel.stopJobs(done);
 	});
 
 	describe('cron job', function() {
@@ -677,7 +677,7 @@ describe('lib/data/data_mysql_late', function() {
 							'batchCount': 3
 						}
 					});
-					CGModel.restartCronJob('mysql_late', cb);
+					CGModel.restartJobs(cb);
 				},
 
 				create: function(cb) {
@@ -696,7 +696,7 @@ describe('lib/data/data_mysql_late', function() {
 
 				restartCronJob2: function(cb) {
 					CGModel.initialize(require('./config/cg_model'));
-					CGModel.restartCronJob('mysql_late', cb);
+					CGModel.restartJobs(cb);
 				},
 
 				check: function(cb) {

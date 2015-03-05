@@ -9,12 +9,12 @@ require('./mysqlShardInit');
 require('./mysqlShardModels');
 
 beforeEach(function(done) {
-	CGModel.startCronJob('mysql_shard')
+	CGModel.startJobs();
 	done();
 });
 
 afterEach(function(done) {
-	CGModel.stopCronJob('mysql_shard', done);
+	CGModel.stopJobs(done);
 });
 
 
@@ -41,7 +41,6 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 					cb();
 				});
 			},
-
 
 		}, function(err) {
 			assert.ok(!err, err);
@@ -458,7 +457,7 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 							user.load(function(err) {
 								assert.ok(!err, err);
 								assert.ok(user.mem.isLoaded);
-								assert.deepEqual(user.p(), _(users).find(function (elem) {
+								assert.deepEqual(user.p(), _(users).find(function(elem) {
 									return elem.userId === user.userId;
 								}).p());
 								cb();
