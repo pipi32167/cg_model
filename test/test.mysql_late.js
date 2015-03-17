@@ -170,6 +170,64 @@ describe('lib/data/data_mysql_late', function() {
 			})
 		});
 
+		it('should run many jobs later success even have error', function(done) {
+			var Item = CGModel.getModel('Item6');
+			var count = 5;
+			var updateCount = 0;
+
+			var items;
+
+			async.series({
+					createItems: function(cb) {
+						helper.createModels(Item, count, function(err, res) {
+							assert.ok(!err, err);
+							items = res;
+							cb();
+						})
+					},
+
+					update: function(cb) {
+
+						items.forEach(function(elem) {
+							elem.db.once('updated', function(err) {
+								// console.trace(err);
+								// assert.ok(!err, err);
+								updateCount++;
+								assert.ok(updateCount <= count, updateCount + '/' + count);
+								if (updateCount === count) {
+									cb();
+								}
+							})
+						});
+
+						var haveErr = false;
+
+						async.each(
+							items,
+							function(record, cb) {
+								if (!haveErr) {
+									haveErr = true;
+									record.updateTime = new Date('test');
+									// console.log(record.updateTime);
+								} else {
+									record.updateTime = new Date();
+								}
+								record.update(function(err) {
+									assert.ok(!err, err);
+								})
+							},
+							function(err) {
+								assert.ok(!err, err);
+								//do not call cb here
+							});
+					}
+				},
+				function(err) {
+					assert.ok(!err, err);
+					done();
+				})
+		});
+
 		it('should run many different jobs later success', function(done) {
 			var User2 = CGModel.getModel('User2');
 			var Friend2 = CGModel.getModel('Friend2');
@@ -282,7 +340,7 @@ describe('lib/data/data_mysql_late', function() {
 
 				createItems: function(cb) {
 					var ids = _.range(1, 1 + itemCount);
-					var args = _(ids).map(function (elem) {
+					var args = _(ids).map(function(elem) {
 						return {
 							id: elem,
 							itemId: 100,
