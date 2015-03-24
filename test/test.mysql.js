@@ -145,7 +145,6 @@ describe('lib/data/data_mysql', function() {
 			})
 		});
 
-
 		it('should extend Item and call static methods success', function(done) {
 
 			var Item = CGModel.getModel('Item');
@@ -270,6 +269,61 @@ describe('lib/data/data_mysql', function() {
 				done();
 			})
 		});
+
+		it('should extend Item and override and call original CRUD success', function(done) {
+
+			var Item = CGModel.getModel('Item');
+
+			var ItemSuper = function() {
+
+			}
+
+			var ItemSub = function() {
+				Item.call(this);
+				ItemSuper.call(this);
+				EventEmitter.call(this);
+			}
+
+			_.extend(ItemSub.prototype, ItemSuper.prototype);
+			_.extend(ItemSub.prototype, EventEmitter.prototype);
+			CGModel.extend(ItemSub, Item);
+
+			var __load = ItemSub.prototype.load;
+			ItemSub.prototype.load = function(cb) {
+				__load.call(this, cb);
+			}
+
+			var id;
+			var item;
+			async.series({
+
+				create: function(cb) {
+					item = new ItemSub();
+					item.itemId = 100;
+					item.create(function(err) {
+						assert.ok(!err, err);
+						helper.checkModelIsLoaded(item);
+						id = item.id;
+						cb();
+					});
+				},
+
+				load: function(cb) {
+					item = new ItemSub();
+					item.id = id;
+					item.load(function(err) {
+						assert.ok(!err, err);
+						helper.checkModelIsLoaded(item);
+						cb();
+					});
+				},
+
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
+
 
 		it('should add a user to the bucket success', function(done) {
 			var bucket = new CGModel.Bucket();

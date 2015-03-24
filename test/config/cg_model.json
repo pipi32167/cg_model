@@ -4,9 +4,9 @@
 		"batchCount": 3
 	},
 	"debug_mode": {
-		"info": true,
-		"sql": true,
-		"redis": true,
+		"info": false,
+		"sql": false,
+		"redis": false,
 		"profile": false
 	}
 }
