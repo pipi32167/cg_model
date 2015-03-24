@@ -58,7 +58,7 @@ describe('lib/data/data_mysql', function() {
 				EventEmitter.call(this);
 			}
 
-			_.extend(ItemSub.prototype, Item.prototype);
+			CGModel.extend(ItemSub, Item);
 			_.extend(ItemSub.prototype, ItemSuper.prototype);
 			_.extend(ItemSub.prototype, EventEmitter.prototype);
 

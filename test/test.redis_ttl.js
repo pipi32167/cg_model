@@ -49,10 +49,9 @@ describe('lib/data/data_redis_ttl', function() {
 				check: function(cb) {
 					var user2 = new User();
 					user2.userId = user.userId;
-					user2.cache.load(function(err) {
+					user2.cache.load(function(err, res) {
 						assert.ok(!err, err);
-						assert.ok(user2.cache.isSaved);
-						assert.deepEqual(user2.cache.p(), user.p());
+						assert.deepEqual(res, user.p());
 						cb();
 					});
 				},
@@ -95,10 +94,9 @@ describe('lib/data/data_redis_ttl', function() {
 				check: function(cb) {
 					var user2 = new User();
 					user2.userId = user.userId;
-					user2.cache.load(function(err) {
+					user2.cache.load(function(err, res) {
 						assert.ok(!err, err);
-						assert.ok(user2.cache.isSaved);
-						assert.deepEqual(user2.cache.p(), user.p());
+						assert.deepEqual(res, user.p());
 						cb();
 					});
 				},
@@ -123,10 +121,9 @@ describe('lib/data/data_redis_ttl', function() {
 				check3: function(cb) {
 					var user2 = new User();
 					user2.userId = user.userId;
-					user2.cache.load(function(err) {
+					user2.cache.load(function(err, res) {
 						assert.ok(!err, err);
-						assert.ok(user2.cache.isSaved);
-						assert.deepEqual(user2.cache.p(), user.p());
+						assert.deepEqual(res, user.p());
 						cb();
 					});
 				},

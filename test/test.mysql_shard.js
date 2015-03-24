@@ -1,4 +1,5 @@
 'use strict';
+require('cliff');
 var _ = require('underscore');
 var assert = require('assert');
 var async = require('async');
@@ -306,7 +307,7 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 								assert.ok(!err, err);
 								assert.equal(user2.money, user.money);
 								cb();
-							})
+							});
 						}, cb);
 				},
 

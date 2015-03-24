@@ -50,19 +50,10 @@ exp.createModels = function(Model, args, cb) {
 }
 
 exp.checkModelIsLoaded = function(obj) {
-
+	
 	assert.ok(obj.mem.isLoaded);
 	assert.ok(obj.db.isSaved);
 	assert.ok(obj.cache.isSaved);
-
-	var props = obj.def.props;
-	var prop;
-	for (prop in props) {
-		if (props.hasOwnProperty(prop)) {
-			assert.deepEqual(obj.mem.p(prop), obj.db.p(prop));
-			assert.deepEqual(obj.mem.p(prop), obj.cache.p(prop));
-		}
-	}
 }
 
 exp.checkModelIsUnloaded = function(obj) {

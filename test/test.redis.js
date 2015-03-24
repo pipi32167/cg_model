@@ -65,7 +65,7 @@ describe('lib/data/data_redis', function() {
             assert.deepEqual(item.itemId, item2.itemId);
             assert.deepEqual(item.isLock, item2.isLock);
             assert.deepEqual(item.desc, item2.desc);
-            assert.deepEqual(item.updateTime, item2.updateTime);
+            assert.deepEqual(Math.floor(item.updateTime/1000), Math.floor(item2.updateTime/1000));
             assert.deepEqual(item.properties1, item2.properties1);
             assert.deepEqual(item.properties2, item2.properties2);
 
@@ -133,6 +133,7 @@ describe('lib/data/data_redis', function() {
               var item = new Item3();
               item.id = id;
               item.itemId = itemId;
+              console.log(item.p());
               item.create(function(err) {
                 assert.ok(!err, err);
                 assert.ok(item.cache.isSaved);

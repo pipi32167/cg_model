@@ -434,9 +434,9 @@ describe('lib/data/data_mysql_late', function() {
 				checkInCache: function(cb) {
 					var item = new Item2();
 					item.id = id;
-					item.cache.load(function(err) {
+					item.cache.load(function(err, res) {
 						assert.ok(!err, err);
-						assert.ok(item.cache.isSaved);
+						assert.ok(!!res);
 						cb();
 					});
 				},
@@ -489,9 +489,9 @@ describe('lib/data/data_mysql_late', function() {
 				checkInCache: function(cb) {
 					var item = new Item2();
 					item.id = id;
-					item.cache.load(function(err) {
+					item.cache.load(function(err, res) {
 						assert.ok(!err, err);
-						assert.ok(item.cache.isSaved);
+						assert.ok(!!res);
 						cb();
 					});
 				},
@@ -573,9 +573,9 @@ describe('lib/data/data_mysql_late', function() {
 						function(id, cb) {
 							var item = new Item2();
 							item.id = id;
-							item.cache.load(function(err) {
+							item.cache.load(function(err, res) {
 								assert.ok(!err, err);
-								assert.ok(item.cache.isSaved);
+								assert.ok(!!res);
 								cb();
 							});
 						},
@@ -1173,9 +1173,9 @@ describe('lib/data/data_mysql_late', function() {
 					var friend2 = new Friend2();
 					friend2.userId = userId;
 					friend2.friendId = friendId;
-					friend2.db.load(function(err) {
+					friend2.db.load(function(err, res) {
 						assert.ok(!err, err);
-						assert.equal(friend2.db.p('type'), friend.type);
+						assert.equal(res.type, friend.type);
 						cb();
 					})
 				}
@@ -1270,9 +1270,9 @@ describe('lib/data/data_mysql_late', function() {
 					var friend2 = new Friend2();
 					friend2.userId = userId;
 					friend2.friendId = friendId;
-					friend2.db.load(function(err) {
+					friend2.db.load(function(err, res) {
 						assert.ok(!err, err);
-						assert.equal(friend2.db.p('type'), friend.type);
+						assert.equal(res.type, friend.type);
 						cb();
 					})
 				}
