@@ -145,6 +145,132 @@ describe('lib/data/data_mysql', function() {
 			})
 		});
 
+
+		it('should extend Item and call static methods success', function(done) {
+
+			var Item = CGModel.getModel('Item');
+
+			var ItemSuper = function() {
+
+			}
+
+			var ItemSub = function() {
+				Item.call(this);
+				ItemSuper.call(this);
+				EventEmitter.call(this);
+			}
+
+			CGModel.extend(ItemSub, Item);
+			_.extend(ItemSub.prototype, ItemSuper.prototype);
+			_.extend(ItemSub.prototype, EventEmitter.prototype);
+
+			var id;
+			var item;
+			async.series({
+				create: function(cb) {
+					item = new ItemSub();
+					item.itemId = 100;
+					item.create(function(err) {
+						assert.ok(!err, err);
+						helper.checkModelIsLoaded(item);
+						id = item.id;
+						cb();
+					});
+				},
+
+				find: function(cb) {
+					ItemSub.find({
+						$where: {
+							id: item.id
+						}
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, 1);
+						cb();
+					})
+				},
+
+				findAll: function(cb) {
+					ItemSub.findAll(function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, 1);
+						cb();
+					})
+				},
+
+				count: function(cb) {
+					ItemSub.count({
+						$where: {
+							id: item.id
+						}
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res, 1);
+						cb();
+					})
+				},
+
+				countAll: function(cb) {
+					ItemSub.countAll(function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res, 1);
+						cb();
+					});
+				},
+
+				load: function(cb) {
+					ItemSub.load({
+						$where: {
+							id: item.id
+						}
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, 1);
+						cb();
+					});
+				},
+
+				loadAll: function(cb) {
+					ItemSub.loadAll(function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, 1);
+						cb();
+					});
+				},
+
+
+				remove: function(cb) {
+					ItemSub.remove({
+						$where: {
+							id: item.id
+						}
+					}, function(err) {
+						assert.ok(!err, err);
+						cb();
+					});
+				},
+
+				removeAll: function(cb) {
+					ItemSub.removeAll(function(err) {
+						assert.ok(!err, err);
+						cb();
+					});
+				},
+
+				checkRemove: function(cb) {
+					ItemSub.countAll(function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res, 0);
+						cb();
+					});
+				}
+
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
+
 		it('should add a user to the bucket success', function(done) {
 			var bucket = new CGModel.Bucket();
 
