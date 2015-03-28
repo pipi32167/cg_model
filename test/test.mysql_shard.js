@@ -643,7 +643,7 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 			var count = 20;
 			async.series({
 				create: function(cb) {
-					async.timesSeries(
+					async.times(
 						count,
 						function(idx, cb) {
 							var user = new User();
@@ -743,7 +743,8 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 				limit = 20;
 			async.series({
 				create: function(cb) {
-					async.timesSeries(
+					console.time('test');
+					async.times(
 						count,
 						function(idx, cb) {
 							var user = new User();
@@ -758,6 +759,7 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 				},
 
 				find: function(cb) {
+					console.timeEnd('test');
 					User.find({
 						$select: ['*'],
 						$limit: limit,
@@ -781,7 +783,7 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 				limit = 20;
 			async.series({
 				create: function(cb) {
-					async.timesSeries(
+					async.times(
 						count,
 						function(idx, cb) {
 							var user = new User();

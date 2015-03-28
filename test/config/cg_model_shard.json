@@ -22,7 +22,7 @@
 		}
 	},
 	"debug_mode": {
-		"info": true,
+		"info": false,
 		"sql": false
 	}
 }
