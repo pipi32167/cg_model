@@ -133,7 +133,6 @@ describe('lib/data/data_redis', function() {
               var item = new Item3();
               item.id = id;
               item.itemId = itemId;
-              console.log(item.p());
               item.create(function(err) {
                 assert.ok(!err, err);
                 assert.ok(item.cache.isSaved);
