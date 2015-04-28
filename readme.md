@@ -193,29 +193,32 @@ var CGModel = require('cg_model');
 var key, config, client;
 var mysqlConfig = require('./mysql.json');
 for (key in mysqlConfig) {
-    config = mysqlConfig[key];
-    client = mysql.createPool(config);
-    CGModel.setDBClient(key, client);
+  config = mysqlConfig[key];
+  client = mysql.createPool(config);
+  CGModel.setDBClient(key, client);
 }
 
 //初始化配置
 CGModel.initialize(require('./cg_model.json'));
-
 //定义model
 require('./model.js')
 
-//创建100个user
+CGModel.start();
+
 var User = CGModel.getModel('User');
 async.timesSeries(100, function(idx, cb) {
-    var user = new User();
-    user.createSync(cb);
+  var user = new User();
+  user.create(cb);
 }, function(err) {
-    if (err) {
-        console.error(err)
-    } else {
-        console.log('done');
-    }
+  if (err) {
+    console.error(err)
+  } else {
+    console.log('done');
+  }
+
+  CGModel.stop(function(err) {
     process.exit(0);
+  });
 });
 ```
 
