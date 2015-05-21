@@ -230,9 +230,16 @@ cg_model的查询能力有限，当涉及到的sql语句较为繁琐时，可以
 ## 七. 建立有过期时间的缓存
 cache的type设置为redis_ttl，增加一个expire字段，用于表示缓存生存期，单位为毫秒。
 
+## 八. 创建只读model
 
+```
+var UserModel =  CGModel.getModel('User');
+var user = new UserModel(null, {readonly: true});
+user.load(callback);
 
-
+//过一段时间后，需要重新同步数据
+user.forceLoad(callback);
+```
 
 
 
