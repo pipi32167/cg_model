@@ -846,6 +846,135 @@ describe('lib/data/data_mysql', function() {
 		});
 	});
 
+	describe('forceLoad', function() {
+
+		it('should load and force load user fail', function(done) {
+
+			var User = CGModel.getModel('User');
+			var userId;
+			var user1, user2;
+
+			async.series({
+				createUser1: function(cb) {
+
+					user1 = new User();
+					user1.create(function(err) {
+						assert.ok(!err, err);
+						userId = user1.userId;
+						helper.checkModelIsLoaded(user1);
+						cb();
+					});
+				},
+
+				loadUser21: function(cb) {
+
+					user2 = new User();
+					user2.userId = userId;
+					user2.load(function(err) {
+						assert.ok(!err, err);
+						helper.checkModelIsLoaded(user2);
+						cb();
+					});
+				},
+
+				updateUser1: function(cb) {
+					user1.money++;
+					user1.update(cb);
+				},
+
+				loadUser22: function(cb) {
+					assert.notEqual(user1.money, user2.money);
+					assert.throws(function() {
+						user2.load(function(err) {
+							assert.ok(!err, err);
+							assert.notEqual(user1.money, user2.money);
+							cb();
+						});
+					});
+					cb();
+				},
+
+				forceLoadUser2: function(cb) {
+					assert.throws(function() {
+						user2.forceLoad(function(err) {
+							assert.ok(!err, err);
+							assert.equal(user1.money, user2.money);
+							cb();
+						});
+					});
+					cb();
+				},
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			});
+		});
+
+		it('should load fail and force load success', function(done) {
+
+			var User = CGModel.getModel('User');
+			var userId;
+			var user1, user2;
+
+			async.series({
+				createUser1: function(cb) {
+
+					user1 = new User(null, {
+						readonly: true
+					});
+					user1.create(function(err) {
+						assert.ok(!err, err);
+						userId = user1.userId;
+						helper.checkModelIsLoaded(user1);
+						cb();
+					});
+				},
+
+				loadUser21: function(cb) {
+
+					user2 = new User(null, {
+						readonly: true,
+					});
+					user2.userId = userId;
+					user2.load(function(err) {
+						assert.ok(!err, err);
+						helper.checkModelIsLoaded(user2);
+						cb();
+					});
+				},
+
+				updateUser1: function(cb) {
+					user1.money++;
+					user1.update(cb);
+				},
+
+				loadUser22: function(cb) {
+					assert.notEqual(user1.money, user2.money);
+					assert.throws(function() {
+						user2.load(function(err) {
+							assert.ok(!err, err);
+							assert.notEqual(user1.money, user2.money);
+							cb();
+						});
+					});
+					cb();
+				},
+
+				forceLoadUser2: function(cb) {
+					user2.forceLoad(function(err) {
+						assert.ok(!err, err);
+						assert.equal(user1.money, user2.money);
+						helper.checkModelIsLoaded(user2);
+						cb();
+					});
+				},
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			});
+		});
+	});
+
 	describe('update', function() {
 
 		it('should update user success', function(done) {
