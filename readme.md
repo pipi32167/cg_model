@@ -1,3 +1,6 @@
+cg_model
+========
+
 cg_model是一个用来同步更新db和cache数据的模块，目前db支持mysql（即时写、缓写、分库写），cache支持redis。
 
 ## 一. 基本概念
