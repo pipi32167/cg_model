@@ -6,6 +6,14 @@ var async = require('async');
 var CGModel = require('../lib');
 // var utils = require('../lib/utils');
 // var consts = require('../lib/consts');
+
+//uncomment this function to test custom shard strategy
+// CGModel.set('shard_strategy', function() {
+// 	var value = this.getShardValue(); //make some test coccur error to pass test
+// 	return value % this.shardCount;
+// 	// return 0;
+// });
+
 require('./mysqlShardInit');
 require('./mysqlShardModels');
 
@@ -98,6 +106,39 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 					});
 
 					user.create(function(err) {
+						assert.ok(!err, err);
+					});
+				},
+				function(err) {
+					assert.ok(!err, err);
+					done();
+				})
+		});
+
+		it('should create many users success when use custom shard strategy', function(done) {
+
+			var userIds = _(1)
+				.chain()
+				.range(100)
+				.sample(10)
+				.value();
+
+			var User = CGModel.getModel('UserShardCustomShardStrategy');
+
+			async.map(
+				userIds,
+				function(userId, cb) {
+
+					var user = new User();
+					user.userId = userId;
+					user.db.on('updated', function(err) {
+						assert.ok(!err, err);
+						cb();
+					});
+
+					user.create(function(err) {
+						assert.equal(user.db.getShardIndex(), user.userId % user.db.shardCount);
+						// assert.equal(user.db.getShardIndex(), 0);
 						assert.ok(!err, err);
 					});
 				},

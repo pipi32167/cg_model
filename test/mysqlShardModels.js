@@ -50,6 +50,37 @@ CGModel.createModel({
   },
 });
 
+
+var shardStrategy = function () {
+  return this.getShardValue() % this.shardCount;
+}
+
+CGModel.createModel({
+  name: 'UserShardCustomShardStrategy',
+
+  props: {
+    userId:             { type: 'number', primary: true, defaultValue: genUserId, shard: true },
+    name:               { type: 'string', unique: true, defaultValue: genName, },
+    money:              { type: 'number', sync: true, defaultValue: 0, },
+    registerTime:       { type: 'date',   defaultValue: genRegisterTime, },
+  },
+
+  db: {
+    type: 'mysql_shard',
+    db_name: 'cg_model_shard_test',
+    tbl_name: 'user',
+    shard_strategy: shardStrategy,
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'cg_model_shard_test',
+    name: 'user',
+    prefix: 'test',
+  },
+});
+
+
 CGModel.createModel({
   name: 'UserShardAsync',
 

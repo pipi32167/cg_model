@@ -241,7 +241,37 @@ user.load(callback);
 user.forceLoad(callback);
 ```
 
+## 九. 创建自定义的分库路由规则
+自定义的路由函数函数会绑定到model.db.getShardIndex上。
+针对某个model的路由规则优先级最高，其次是全局路由规则，最后是默认路由规则。
+```
+//全局的路由规则
+CGModel.set('shard_strategy', function () {
+  return this.getShardValue() % this.shardCount; 
+});
 
+//针对某个model的路由规则
+var shardStrategy = function () {
+  return this.getShardValue() % this.shardCount;
+}
 
+CGModel.createModel({
+  name: 'UserUseCustomShardStrategy',
 
+  props: {
+    userId:             { type: 'number', primary: true, shard: true },
+  },
 
+  db: {
+    type: 'mysql_shard',
+    db_name: 'test',
+    tbl_name: 'user',
+    shard_strategy: shardStrategy,
+  },
+
+  cache: {
+    type: 'none',
+  },
+});
+
+```
