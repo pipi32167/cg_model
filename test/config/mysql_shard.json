@@ -9,10 +9,10 @@
   },
   "cg_model_shard_test_0": {
     "connectionLimit": 10,
-    "host": "192.168.33.10",
+    "host": "localhost",
     "port": 3306,
-    "user": "root",
-    "password": "123456",
+    "user": "yqb",
+    "password": "yqb",
     "multipleStatements": true
   },
   "cg_model_shard_test_1": {

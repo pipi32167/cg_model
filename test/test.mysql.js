@@ -324,7 +324,6 @@ describe('lib/data/data_mysql', function() {
 			})
 		});
 
-
 		it('should add a user to the bucket success', function(done) {
 			var bucket = new CGModel.Bucket();
 
@@ -1721,6 +1720,51 @@ describe('lib/data/data_mysql', function() {
 						})
 						cb();
 					});
+				},
+
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
+
+		it('should find success by like operator', function(done) {
+
+			var User = CGModel.getModel('User');
+			var count = 5;
+			var names = ['test10', 'test11', 'test12', 'test20', 'test21'];
+			var users;
+			async.series({
+
+				createUsers: function(cb) {
+					async.times(
+						count,
+						function(idx, cb) {
+
+							var user = new User();
+							user.name = names[idx];
+							user.create(function(err) {
+								assert.ok(!err, err);
+								cb();
+							})
+						}, cb);
+				},
+
+				findUserByLike: function(cb) {
+				
+						User.load({
+							name: {
+								like: 'test1%'
+							}
+						}, function(err, res) {
+							assert.ok(!err, err);
+							assert.equal(res.length, 3);
+							res.forEach(function(elem) {
+								// console.log(elem.p());
+								helper.checkModelIsLoaded(elem);
+							})
+							cb();
+						});
 				},
 
 			}, function(err) {
