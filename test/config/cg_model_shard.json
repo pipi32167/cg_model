@@ -12,10 +12,12 @@
 						"cg_model_shard_test"
 					],
 					"cg_model_shard_test_0": [
-						"cg_model_shard_test_shard_00"
+						"cg_model_shard_test_shard_00",
+						"cg_model_shard_test_shard_01"
 					],
 					"cg_model_shard_test_1": [
-						"cg_model_shard_test_shard_01"
+						"cg_model_shard_test_shard_02",
+						"cg_model_shard_test_shard_03"
 					]
 				}
 			}
@@ -23,6 +25,7 @@
 	},
 	"debug_mode": {
 		"info": false,
-		"sql": false
+		"sql": false,
+		"job": true
 	}
 }
