@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+cd `dirname $0`
+
+MYSQL_USER=yqb
+MYSQL_PWD=yqb
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+DB='cg_model_shard_test'
+SCRIPT='../sql/cg_model_test.sql'
+START_IDX=0
+END_IDX=4
+
+mysql -u$MYSQL_USER -p$MYSQL_PWD -h$MYSQL_HOST -P$MYSQL_PORT -e "DROP DATABASE IF EXISTS $DB; CREATE DATABASE $DB DEFAULT CHARACTER SET utf8; USE $DB; source $SCRIPT;"  && echo "[INFO]: install $DB success"
+
+if [[ $START_IDX != $END_IDX ]]; then
+	ORG_DB=$DB
+	for (( i = $START_IDX; i <= $END_IDX; i++ )); do
+		DB=$ORG_DB`printf '_shard_%02d' $i`
+		mysql -u$MYSQL_USER -p$MYSQL_PWD -h$MYSQL_HOST -P$MYSQL_PORT -e "DROP DATABASE IF EXISTS $DB; CREATE DATABASE $DB DEFAULT CHARACTER SET utf8; USE $DB; source $SCRIPT;"  && echo "[INFO]: install $DB success"
+	done
+fi
