@@ -26,6 +26,6 @@
 	"debug_mode": {
 		"info": false,
 		"sql": false,
-		"job": true
+		"job": false
 	}
 }

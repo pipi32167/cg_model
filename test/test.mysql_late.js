@@ -176,6 +176,7 @@ describe('lib/data/data_mysql_late', function() {
 			var updateCount = 0;
 
 			var items;
+			console.log('this test should print some log, ignore!');
 
 			async.series({
 					createItems: function(cb) {

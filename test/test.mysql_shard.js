@@ -1936,7 +1936,6 @@ describe('lib/data/data_mysql_shard(no shard)', function() {
 	});
 });
 
-
 describe('lib/data/data_mysql_shard(shard 0)', function() {
 
 	beforeEach(function(done) {

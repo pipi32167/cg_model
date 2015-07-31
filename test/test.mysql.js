@@ -644,6 +644,7 @@ describe('lib/data/data_mysql', function() {
 		it('should create an item failed when not provide all required properties', function() {
 			var Item = CGModel.getModel('Item');
 			var item = new Item();
+			console.log('this test should print some log, ignore!');
 			assert.throws(function() {
 				item.create(function() {});
 			});
