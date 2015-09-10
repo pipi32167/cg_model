@@ -1,7 +1,19 @@
 {
   "name": "cg_model",
-  "version": "0.0.124",
+  "version": "0.0.125",
   "description": "db + cache update framework",
+  "homepage": "https://github.com/pipi32167/cg_model",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pipi32167/cg_model.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pipi32167/cg_model/issues"
+  },
+  "licenses": [{
+    "type": "MIT",
+    "url": "https://github.com/pipi32167/cg_model#license"
+  }],
   "main": "./lib/index.js",
   "scripts": {
     "test": "mocha test/test.redis.js && mocha test/test.redis_ttl.js && mocha test/test.mysql.js && mocha test/test.mysql_late.js && mocha test/test.mysql_shard.js"
@@ -19,6 +31,5 @@
     "underscore": "1.7.0",
     "underscore.string": "2.4.0"
   },
-  "author": "pipi32167@gmail.com",
-  "license": "ISC"
+  "author": "pipi32167@gmail.com"
 }
