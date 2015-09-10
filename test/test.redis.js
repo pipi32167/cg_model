@@ -65,7 +65,7 @@ describe('lib/data/data_redis', function() {
             assert.deepEqual(item.itemId, item2.itemId);
             assert.deepEqual(item.isLock, item2.isLock);
             assert.deepEqual(item.desc, item2.desc);
-            assert.deepEqual(Math.floor(item.updateTime/1000), Math.floor(item2.updateTime/1000));
+            assert.deepEqual(Math.floor(item.updateTime / 1000), Math.floor(item2.updateTime / 1000));
             assert.deepEqual(item.properties1, item2.properties1);
             assert.deepEqual(item.properties2, item2.properties2);
 
@@ -98,6 +98,75 @@ describe('lib/data/data_redis', function() {
         assert.ok(!err, err);
         done();
       })
+    });
+
+    it('should create an item success by promise', function() {
+      var Item3 = CGModel.getModel('Item3');
+      var item = new Item3();
+      var id = 1;
+      var itemId = 100;
+      item.p({
+        id: id,
+        itemId: itemId,
+      });
+
+      return item.createAsync()
+        .then(function() {
+
+          assert.ok(item.cache.isSaved);
+          assert.ok(item.mem.isLoaded);
+        })
+        .then(function load() {
+
+          var item = new Item3();
+          item.id = id;
+          return item.loadAsync().then(function() {
+            assert.ok(item.cache.isSaved);
+            assert.ok(item.mem.isLoaded);
+            assert.equal(item.itemId, itemId);
+          })
+        })
+        .then(function update() {
+          item.itemId = 101;
+          item.isLock = true;
+          item.desc = 'testtesttest';
+          item.updateTime = new Date();
+          item.properties1.test = 1;
+          item.properties2.push(1);
+          return item.updateAsync();
+        })
+        .then(function checkUpdate() {
+          var item2 = new Item3();
+          item2.id = id;
+          return item2.loadAsync().then(function() {
+            assert.ok(item2.cache.isSaved);
+            assert.ok(item2.mem.isLoaded);
+            assert.deepEqual(item.itemId, item2.itemId);
+            assert.deepEqual(item.isLock, item2.isLock);
+            assert.deepEqual(item.desc, item2.desc);
+            assert.deepEqual(
+              Math.floor(item.updateTime / 1000),
+              Math.floor(item2.updateTime / 1000));
+            assert.deepEqual(item.properties1, item2.properties1);
+            assert.deepEqual(item.properties2, item2.properties2);
+          });
+        })
+        .then(function remove() {
+          var item = new Item3();
+          item.id = id;
+          return item.removeAsync().then(function() {
+            assert.ok(!item.cache.isSaved);
+            assert.ok(!item.mem.isLoaded);
+          });
+        })
+        .then(function checkRemove() {
+          var item = new Item3();
+          item.id = id;
+          return item.loadAsync().then(function() {
+            assert.ok(!item.cache.isSaved);
+            assert.ok(!item.mem.isLoaded);
+          });
+        });
     });
 
     it('should update an item success', function(done) {
