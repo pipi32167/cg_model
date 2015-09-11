@@ -10,8 +10,13 @@ var CGModel = require('../lib');
 var benchmark = require('./benchmark');
 require('./init');
 
+// CGModel.debug_mode.sql = true;
+
 var dbName = 'cg_model_benchmark';
 var LoadObjectModel = CGModel.getModel('LoadObject');
+var LoadObjectShardModel = CGModel.getModel('LoadObjectShard');
+
+var COUNT = 2000;
 
 var before = function(done) {
   CGModel.start();
@@ -29,7 +34,7 @@ var before = function(done) {
 
     createData: function(cb) {
       async.timesSeries(
-        1000,
+        COUNT,
         function(idx, cb) {
           var loadObj = new LoadObjectModel();
           loadObj.property1 = Math.floor(Math.random() * 1000);
@@ -54,7 +59,6 @@ var after = function(done) {
   }, done);
 }
 
-var COUNT = 1000;
 
 var loadOneByOne = function(cb) {
   async.times(
@@ -65,7 +69,6 @@ var loadOneByOne = function(cb) {
       loadObj.load(cb);
     },
     cb);
-
 }
 
 var loadBatch = function(cb) {
@@ -77,14 +80,23 @@ var loadBatch = function(cb) {
     objs.push(loadObj);
   }
 
-  objs[0].batchLoad(objs, function(err) {
-    // if (!err) {
-    //   objs.forEach(function(elem) {
-    //     console.log(elem.toModelJSON());
-    //   })
-    // }
-    cb(err);
-  });
+  async.each(objs, function(elem, cb) {
+    elem.load(cb);
+  }, cb);
+}
+
+var loadBatchShard = function(cb) {
+  var objs = [];
+  var loadObj;
+  for (var i = 0; i < COUNT; i++) {
+    loadObj = new LoadObjectShardModel();
+    loadObj.objId = i + 1;
+    objs.push(loadObj);
+  }
+
+  async.each(objs, function(elem, cb) {
+    elem.load(cb);
+  }, cb);
 }
 
 
@@ -106,6 +118,12 @@ benchmark.runAsync({
       name: 'loadBatch',
 
       fn: loadBatch,
+    },
+
+    loadBatchShard: {
+      name: 'loadBatchShard',
+
+      fn: loadBatchShard,
     },
   }
 });

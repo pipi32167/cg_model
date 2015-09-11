@@ -1,0 +1,5 @@
+{
+	"cg_model_test": {
+		"url": "mongodb://localhost:27017/cg_model_test"
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"mongodb": {
+		
+	},
+	"debug_mode": {
+		"info": false,
+		"sql": false,
+		"redis": false,
+		"mongodb": true,
+		"profile": false
+	}
+}

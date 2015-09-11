@@ -1,10 +1,22 @@
 {
-  "mysql_late": {
-    "cron": "* */2 * * * *",
-    "batchCount": 1000
-  },
-  "debug_mode": {
-    "info": false,
-    "sql": false
-  }
+	"mysql_shard": {
+		"cron": "* * * * * *",
+		"batchCount": 100,
+		"shard_count": 0,
+		"database": {
+			"cg_model_benchmark": {
+				"main_db": "cg_model_benchmark",
+				"shard_db_format": "cg_model_benchmark_shard_%02d",
+				"connection": {
+					"cg_model_benchmark": [
+						"cg_model_benchmark"
+					]
+				}
+			}
+		}
+	},
+	"debug_mode": {
+		"info": false,
+		"sql": false
+	}
 }
