@@ -1,5 +1,5 @@
 'use strict';
-require('cliff');
+// require('cliff');
 var _ = require('underscore');
 var assert = require('assert');
 var async = require('async');
