@@ -266,4 +266,48 @@ describe('lib/data/data_redis', function() {
       })
     });
   });
+
+  describe('upgrade data', function() {
+    it('should upgrade data success', function(done) {
+
+      async.series({
+        createVersion0: function(cb) {
+          var Record = CGModel.getModel('Record0');
+          var record = new Record();
+          record.id = 1;
+          record.recordTime = new Date();
+          record.create(cb);
+        },
+
+        loadByVersion2: function(cb) {
+          var Record = CGModel.getModel('Record2');
+          var record = new Record();
+          record.id = 1;
+          record.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(typeof record.recordTime === 'number');
+            assert.ok(typeof record.propToBeDelete === 'undefined');
+            assert.ok(typeof record.propAdd === 'number');
+            record.incrVersion();
+            record.update(cb);
+          });
+        },
+
+        loadByVersion3: function(cb) {
+          var Record = CGModel.getModel('Record3');
+          var record = new Record();
+          record.id = 1;
+          record.load(function(err) {
+            assert.ok(!err, err);
+            assert.ok(record.propAdd instanceof Array);
+            record.incrVersion();
+            record.update(cb);
+          });
+        }
+      }, function(err) {
+        assert.ok(!err, err);
+        done();
+      })
+    });
+  });
 });

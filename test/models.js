@@ -1,4 +1,6 @@
 'use strict';
+var assert = require('assert');
+var _ = require('underscore');
 require('./init');
 var CGModel = require('../lib');
 
@@ -388,4 +390,112 @@ CGModel.createModel({
     name: 'record',
     prefix: 'test',
   },
+});
+
+
+var upgradeFns = {};
+upgradeFns[1] = function (data, cb) {
+  
+  if (isNaN(data.recordTime)) {
+    data.recordTime = new Date(data.recordTime).getTime();
+  } else {
+    data.recordTime = new Date(Number(data.recordTime)).getTime();
+  }
+  cb();
+}
+
+upgradeFns[2] = function (data, cb) {
+  
+  delete data.propToBeDelete;
+  var defaultValue = this.def.props.propAdd.defaultValue;
+  if (defaultValue instanceof Function) {
+    
+    defaultValue(function(err, res) {
+      if (!err) {
+        data.propAdd = res;
+      }
+      cb(err);
+    });
+  } else {
+    data.propAdd = defaultValue;
+    cb();
+  }
+}
+
+upgradeFns[3] = function (data, cb) {
+  data.propAdd = [parseInt(data.propAdd, 10)];
+  cb();
+}
+
+CGModel.createModel({
+
+  name: 'Record0',
+
+  props: {
+    id:               { type: 'number', primary: true },
+    recordTime:       { type: 'date' },
+    propToBeDelete:   { type: 'number', defaultValue: 0 },
+  },
+
+  db: {
+    type: 'none',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'cg_model_test',
+    name: 'record',
+    prefix: 'test',
+  },
+});
+
+
+CGModel.createModel({
+
+  name: 'Record2',
+
+  props: {
+    id:               { type: 'number', primary: true },
+    recordTime:       { type: 'number' },
+    propAdd:          { type: 'number', defaultValue: 0 },
+  },
+
+  db: {
+    type: 'none',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'cg_model_test',
+    name: 'record',
+    prefix: 'test',
+  },
+
+  upgradeFns: upgradeFns,
+  version: 2,
+});
+
+CGModel.createModel({
+
+  name: 'Record3',
+
+  props: {
+    id:               { type: 'number', primary: true },
+    recordTime:       { type: 'number' },
+    propAdd:          { type: 'array', defaultValue: [] },
+  },
+
+  db: {
+    type: 'none',
+  },
+
+  cache: {
+    type: 'redis',
+    cache_name: 'cg_model_test',
+    name: 'record',
+    prefix: 'test',
+  },
+
+  upgradeFns: upgradeFns,
+  version: 3,
 });
