@@ -817,6 +817,48 @@ describe('lib/data/data_mysql_shard(shard n > 0)', function() {
 			});
 		});
 
+		it('should find users by limit success but not limit on reduce', function(done) {
+			var User = CGModel.getModel('UserShardSync');
+			var users = [];
+			var count = 100,
+				limit = 20;
+			async.series({
+				create: function(cb) {
+					console.time('test');
+					async.times(
+						count,
+						function(idx, cb) {
+							var user = new User();
+							user.registerTime = new Date(Date.now() + Math.floor(Math.random() * 10000));
+							user.money = Math.floor(Math.random() * 10)
+							user.createSync(function(err) {
+								assert.ok(!err, err);
+								users.push(user);
+								cb();
+							});
+						}, cb);
+				},
+
+				find: function(cb) {
+					console.timeEnd('test');
+					User.find({
+						$select: ['*'],
+						$limit: limit,
+						$shardOpts: {
+							noLimitOnReduce: true
+						}
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, limit * CGModel.get('config').mysql_shard.shard_count);
+						cb();
+					})
+				},
+
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			});
+		});
 		it('should find user with order and limit success', function(done) {
 			var User = CGModel.getModel('UserShardSync');
 			var users = [];
