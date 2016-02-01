@@ -1,5 +1,5 @@
 'use strict';
-var EventEmitter = require('events').EventEmitter;
+// var EventEmitter = require('events').EventEmitter;
 var _ = require('underscore');
 var assert = require('assert');
 var async = require('async');
@@ -31,7 +31,7 @@ beforeEach(function(done) {
 	});
 });
 
-var helper = require('./helper');
+// var helper = require('./helper');
 
 describe('lib/data/data_mongodb', function() {
 
@@ -174,28 +174,99 @@ describe('lib/data/data_mongodb', function() {
 	describe('static find', function() {
 		it('should find success', function(done) {
 
-			var userId = 1;
+			var userIds = _.range(1, 10);
 			var User = CGModel.getModel('User');
-			var user1, user2;
+			var users = [];
 
 			async.series({
 				create: function(cb) {
-					user1 = new User();
-					user1.userId = userId;
-					user1.create(function(err) {
-						assert.ok(!err, err);
-						cb();
-					});
+
+					async.each(userIds, function(userId, cb) {
+
+						var user = new User();
+						user.userId = userId;
+						user.create(function(err) {
+							assert.ok(!err, err);
+							users.push(user);
+							cb();
+						});
+					}, cb);
 				},
 
 				find: function(cb) {
 
 					User.find({
-						userId: userId
+						userId: userIds[0]
 					}, function(err, res) {
 						assert.ok(!err, err);
 						assert.equal(res.length, 1);
-						assert.equal(res[0].userId, userId);
+						assert.equal(res[0].userId, userIds[0]);
+						cb();
+					});
+				},
+
+
+				findByLimit: function(cb) {
+
+					User.find({
+						$limit: 5,
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, 5);
+						// assert.equal(res[0].userId, userIds[0]);
+						cb();
+					});
+				},
+			}, function(err) {
+				assert.ok(!err, err);
+				done();
+			})
+		});
+	});
+
+	describe('static load', function() {
+		it('should find success', function(done) {
+
+			var userIds = _.range(1, 10);
+			var User = CGModel.getModel('User');
+			var users = [];
+
+			async.series({
+				create: function(cb) {
+
+					async.each(userIds, function(userId, cb) {
+
+						var user = new User();
+						user.userId = userId;
+						user.create(function(err) {
+							assert.ok(!err, err);
+							users.push(user);
+							cb();
+						});
+					}, cb);
+				},
+
+				load: function(cb) {
+
+					User.load({
+						userId: userIds[0]
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, 1);
+						assert.equal(res[0].userId, userIds[0]);
+						cb();
+					});
+				},
+
+
+				loadByLimit: function(cb) {
+
+					User.load({
+						$limit: 5,
+					}, function(err, res) {
+						assert.ok(!err, err);
+						assert.equal(res.length, 5);
+						// assert.equal(res[0].userId, userIds[0]);
 						cb();
 					});
 				},
@@ -310,6 +381,69 @@ describe('lib/data/data_mongodb', function() {
 			})
 		});
 	});
+
+	// describe('static load', function() {
+	// 	it('should load success', function(done) {
+
+	// 		var userId = 1;
+	// 		var User = CGModel.getModel('User');
+	// 		var user1, user2;
+
+	// 		async.series({
+
+	// 			count1: function(cb) {
+	// 				User.load({
+	// 					userId: userId
+	// 				}, function(err, res) {
+	// 					assert.ok(!err, err);
+	// 					assert.equal(res, 0);
+	// 					cb();
+	// 				});
+	// 			},
+
+	// 			create: function(cb) {
+	// 				user1 = new User();
+	// 				user1.userId = userId;
+	// 				user1.create(function(err) {
+	// 					assert.ok(!err, err);
+	// 					cb();
+	// 				});
+	// 			},
+
+	// 			count2: function(cb) {
+	// 				User.count({
+	// 					userId: userId
+	// 				}, function(err, res) {
+	// 					assert.ok(!err, err);
+	// 					assert.equal(res, 1);
+	// 					cb();
+	// 				});
+	// 			},
+
+	// 			remove: function(cb) {
+	// 				User.remove({
+	// 					userId: userId
+	// 				}, function(err, res) {
+	// 					assert.ok(!err, err);
+	// 					cb();
+	// 				});
+	// 			},
+
+	// 			count3: function(cb) {
+	// 				User.count({
+	// 					userId: userId
+	// 				}, function(err, res) {
+	// 					assert.ok(!err, err);
+	// 					assert.equal(res, 0);
+	// 					cb();
+	// 				});
+	// 			},
+	// 		}, function(err) {
+	// 			assert.ok(!err, err);
+	// 			done();
+	// 		})
+	// 	});
+	// });
 
 	describe('upgrade data', function() {
 		it('should upgrade data success', function(done) {
